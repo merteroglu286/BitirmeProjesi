@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/get_user_data_navigation"
+    app:startDestination="@id/kullaniciBilgilendirmeFragment">
+
+    <fragment
+        android:id="@+id/kullaniciDogumTarihiFragment"
+        android:name="com.example.bitirmeprojesi.Fragments.GetUserData.KullaniciDogumTarihiFragment"
+        android:label="fragment_kullanici_dogum_tarihi"
+        tools:layout="@layout/fragment_kullanici_dogum_tarihi" >
+        <action
+            android:id="@+id/action_kullaniciDogumTarihiFragment_to_kullaniciCinsiyetFragment"
+            app:destination="@id/kullaniciCinsiyetFragment" />
+        <argument android:name="kullaniciAdi"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/kullaniciCinsiyetFragment"
+        android:name="com.example.bitirmeprojesi.Fragments.GetUserData.KullaniciCinsiyetFragment"
+        android:label="fragment_kullanici_cinsiyet"
+        tools:layout="@layout/fragment_kullanici_cinsiyet" >
+        <action
+            android:id="@+id/action_kullaniciCinsiyetFragment_to_kullaniciFotografFragment"
+            app:destination="@id/kullaniciFotografFragment" />
+        <argument
+            android:name="kullaniciAdi"
+            app:argType="string" />
+        <argument
+            android:name="dogumTarihi"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/kullaniciFotografFragment"
+        android:name="com.example.bitirmeprojesi.Fragments.GetUserData.KullaniciFotografFragment"
+        android:label="fragment_kullanici_fotograf"
+        tools:layout="@layout/fragment_kullanici_fotograf" >
+        <argument
+            android:name="kullaniciAdi"
+            app:argType="string" />
+        <argument
+            android:name="dogumTarihi"
+            app:argType="string" />
+        <argument
+            android:name="cinsiyet"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/kullaniciBilgilendirmeFragment"
+        android:name="com.example.bitirmeprojesi.Fragments.GetUserData.KullaniciBilgilendirmeFragment"
+        android:label="fragment_kullanici_bilgilendirme"
+        tools:layout="@layout/fragment_kullanici_bilgilendirme" >
+        <action
+            android:id="@+id/action_kullaniciBilgilendirmeFragment_to_kullaniciAdiFragment"
+            app:destination="@id/kullaniciAdiFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/kullaniciAdiFragment"
+        android:name="com.example.bitirmeprojesi.Fragments.GetUserData.KullaniciAdiFragment"
+        android:label="fragment_kullanici_adi"
+        tools:layout="@layout/fragment_kullanici_adi" >
+        <action
+            android:id="@+id/action_kullaniciAdiFragment_to_kullaniciDogumTarihiFragment"
+            app:destination="@id/kullaniciDogumTarihiFragment" />
+    </fragment>
+</navigation>
