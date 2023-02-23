@@ -36,5 +36,32 @@
             android:visibility="gone"
             android:layout_marginEnd="12dp"/>
     </LinearLayout>
-    
+
+    <LinearLayout
+        android:id="@+id/linear2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="12dp">
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabGreen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:backgroundTint="@color/main_green"
+            app:tint="@color/white"
+            android:layout_marginEnd="12dp"
+            android:visibility="gone"
+            android:src="@drawable/ic_baseline_check_24" />
+
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabAddLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:backgroundTint="@color/main_blue"
+            android:layout_marginEnd="12dp"
+            app:tint="@color/white"
+            android:src="@drawable/ic_baseline_check_24" />
+    </LinearLayout>
 </RelativeLayout>
