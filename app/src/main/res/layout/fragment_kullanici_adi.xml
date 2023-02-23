@@ -9,7 +9,7 @@
         android:id="@+id/view"
         android:layout_width="84dp"
         android:layout_height="10dp"
-        android:background="@color/main_red"
+        android:background="@color/main_blue"
         />
 
     <ImageView

@@ -79,7 +79,7 @@ class FirebaseNotificationService : FirebaseMessagingService() {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setAutoCancel(true)
-            .setColor(ResourcesCompat.getColor(resources, R.color.main_red, null))
+            .setColor(ResourcesCompat.getColor(resources, R.color.main_blue, null))
             .setSound(uri)
 
         val intent = Intent(this, MessagingActivity::class.java)
@@ -133,7 +133,7 @@ class FirebaseNotificationService : FirebaseMessagingService() {
             .setContentText(message)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setAutoCancel(true)
-            .setColor(ResourcesCompat.getColor(resources, R.color.main_red, null))
+            .setColor(ResourcesCompat.getColor(resources, R.color.main_blue, null))
             .setContentIntent(pendingIntent)
             .build()
 

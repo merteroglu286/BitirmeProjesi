@@ -47,7 +47,7 @@
                     android:minWidth="64dp"
                     android:paddingHorizontal="16dp"
                     android:layout_marginStart="8dp"
-                    android:textColor="@color/main_red"
+                    android:textColor="@color/main_blue"
                     android:text="merhaba"/>
 
                 <TextView

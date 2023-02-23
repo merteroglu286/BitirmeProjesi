@@ -10,7 +10,7 @@
         android:id="@+id/view"
         android:layout_width="420dp"
         android:layout_height="10dp"
-        android:background="@color/main_red"
+        android:background="@color/main_blue"
         />
 
     <ImageView
@@ -105,7 +105,7 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_centerInParent="true"
-            android:indeterminateTint="@color/main_red" />
+            android:indeterminateTint="@color/main_blue" />
     </RelativeLayout>
 
 </RelativeLayout>

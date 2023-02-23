@@ -65,7 +65,7 @@
             app:itemRadius="4dp"
             app:itemSpacing="10dp"
             app:itemWidth="48dp"
-            app:lineColor="@color/main_red"
+            app:lineColor="@color/main_blue"
             app:lineWidth="2dp"
             app:viewType="rectangle" />
 
@@ -101,7 +101,7 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_centerInParent="true"
-            android:indeterminateTint="@color/main_red" />
+            android:indeterminateTint="@color/main_blue" />
     </RelativeLayout>
 
 
