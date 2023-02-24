@@ -10,58 +10,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".Dashboard.MapsFragment" />
-    <LinearLayout
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddLocation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/linear2"
-        android:layout_alignParentEnd="true">
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabYellow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_baseline_check_24"
-            app:backgroundTint="#FFD600"
-            app:tint="@color/white"
-            android:visibility="gone"
-            android:layout_marginEnd="12dp"
-            android:layout_marginBottom="12dp"/>
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabRed"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_baseline_check_24"
-            app:backgroundTint="@color/main_red2"
-            app:tint="@color/white"
-            android:visibility="gone"
-            android:layout_marginEnd="12dp"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linear2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
+        app:backgroundTint="@color/main_red2"
+        android:layout_margin="24dp"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="12dp">
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabGreen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:backgroundTint="@color/main_green"
-            app:tint="@color/white"
-            android:layout_marginEnd="12dp"
-            android:visibility="gone"
-            android:src="@drawable/ic_baseline_check_24" />
-
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabAddLocation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:backgroundTint="@color/main_blue"
-            android:layout_marginEnd="12dp"
-            app:tint="@color/white"
-            android:src="@drawable/ic_baseline_check_24" />
-    </LinearLayout>
+        android:layout_alignParentEnd="true"
+        app:tint="@color/white"
+        android:src="@drawable/baseline_share_location_24" />
 </RelativeLayout>

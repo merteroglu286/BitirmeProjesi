@@ -13,8 +13,10 @@
         android:inputType="textMultiLine"
         android:lines="8"
         android:maxLines="10"
+        android:gravity="top|left"
         android:minLines="6"
-        android:scrollbars="none" />
+        android:scrollbars="none"
+        android:background="@drawable/bildiri_edittext_bg"/>
 
     <TextView
         android:id="@+id/txt"
@@ -59,7 +61,7 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/btnVerify"
+        android:id="@+id/bildiriOlusturBtn"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_below="@id/linearButtons"

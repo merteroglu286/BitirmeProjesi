@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -67,6 +68,7 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                 onMapReady(googleMap)
         }
 
+
     }
 
     override fun onDestroy() {
@@ -85,6 +87,7 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                 // lokasyon,konum degisince yapilacak islemer
 
                 guncelKonum = LatLng(konum.latitude,konum.longitude)
+
                 binding.fabAddLocation.setOnClickListener{
 
                     Toast.makeText(context,"tıklandı",Toast.LENGTH_SHORT).show()
@@ -94,10 +97,17 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                     dialog = alertDialog.create()
                     dialog.show()
 
-
-
-
+                    dialogBinding.bildiriOlusturBtn.setOnClickListener {
+                        val map = mapOf(
+                            "latitude" to konum.latitude.toString(),
+                            "longitude" to konum.longitude.toString(),
+                            "uid" to FirebaseAuth.getInstance().uid!!.toString(),
+                        )
+                        FirebaseDatabase.getInstance().getReference("Location")!!.child(FirebaseAuth.getInstance().uid!!.toString(),).updateChildren(map)
+                        dialog.dismiss()
+                    }
                 }
+
 /*
                 binding.fabAddLocation.setOnClickListener {
 
