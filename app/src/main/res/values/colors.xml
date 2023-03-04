@@ -9,6 +9,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="my_white">#F7F8FC</color>
     <color name="main_blue">#6791FF</color>
+    <color name="main_red">#D50000</color>
     <color name="main_red2">#DE0D3A</color>
     <color name="transparent">#00FFFFFF</color>
     <color name="lightOrange">#FFA054</color>

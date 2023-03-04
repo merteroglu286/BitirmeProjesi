@@ -2,8 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:id="@+id/dialog_context"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@drawable/border_dialog"
+    android:background="@drawable/border_dialog_green"
     android:padding="16dp">
 
     <EditText
@@ -11,12 +12,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textMultiLine"
-        android:lines="8"
-        android:maxLines="10"
+        android:lines="6"
+        android:maxLines="8"
         android:gravity="top|left"
-        android:minLines="6"
+        android:minLines="4"
+        android:hint="Bir mesaj yazınız"
+        android:padding="8dp"
         android:scrollbars="none"
         android:background="@drawable/bildiri_edittext_bg"/>
+
+    <TextView
+        android:id="@+id/alertTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lütfen bir mesaj giriniz."
+        android:layout_below="@id/messageEdittext"
+        android:layout_marginTop="4dp"
+        android:visibility="gone"
+        android:textColor="@color/main_red"/>
 
     <TextView
         android:id="@+id/txt"
@@ -24,47 +37,55 @@
         android:layout_height="wrap_content"
         android:text="Bildiri derecesini seçiniz"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/messageEdittext"
+        android:layout_below="@id/alertTxt"
         android:textSize="18dp"
         android:layout_marginTop="12dp"
         android:textStyle="bold"
         android:textColor="@color/black"/>
 
-    <LinearLayout
-        android:id="@+id/linearButtons"
+    <RadioGroup
+        android:id="@+id/radioGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:layout_below="@id/txt"
-        android:padding="24dp"
+        android:layout_marginTop="12dp"
+        android:checkedButton="@id/btnGreen"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="12dp">
+        android:orientation="horizontal">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:backgroundTint="#64DD17"
-            android:layout_marginHorizontal="12dp"
+        <RadioButton
+            android:id="@+id/btnGreen"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:button="@color/transparent"
+            android:background="@drawable/radio_green"
             />
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:backgroundTint="#FFD600"
-            android:layout_marginHorizontal="12dp"
+
+        <RadioButton
+            android:id="@+id/btnYellow"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="8dp"
+            android:button="@color/transparent"
+            android:background="@drawable/radio_yellow"
             />
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:backgroundTint="#DD2C00"
-            android:layout_marginHorizontal="12dp"
+
+        <RadioButton
+            android:id="@+id/btnRed"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="8dp"
+            android:button="@color/transparent"
+            android:background="@drawable/radio_red"
             />
-    </LinearLayout>
+
+    </RadioGroup>
 
     <TextView
         android:id="@+id/bildiriOlusturBtn"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:layout_below="@id/linearButtons"
+        android:layout_below="@id/radioGroup"
         android:layout_centerHorizontal="true"
         android:layout_marginHorizontal="62dp"
         android:layout_marginTop="12dp"

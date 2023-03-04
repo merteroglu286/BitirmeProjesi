@@ -36,7 +36,6 @@ class DashboardActivity : AppCompatActivity() {
 
         val fragments: ArrayList<Fragment> = arrayListOf(
             ChatFragment(),
-            SearchFragment(),
             ProfileFragment()
         )
 
