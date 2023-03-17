@@ -3,8 +3,6 @@ package com.example.bitirmeprojesi
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import de.hdodenhof.circleimageview.CircleImageView
-
-
 data class UserModel(
     var username: String = "",
     var token: String = "",
@@ -14,7 +12,9 @@ data class UserModel(
     val uid: String = "",
     val gender: String = "",
     val birthday : String = "",
-    val kayitliMi : Boolean = false
+    val kayitliMi : Boolean = false,
+    val followers : String = "", // takipçi
+    val following : String = ""  // takip edilen
 ){
 
 

@@ -6,10 +6,12 @@ data class NoticeModel(
     val userID : String?,
     val latitude: String?,
     val longitude : String?,
+    val noticeID : String?,
     val noticeMessage : String?,
     val noticeImage : String?,
-    val noticeDegree : String?
+    val noticeDegree : String?,
+    val noticeTime : String?
 ) {
-    constructor() : this("","", "", "", "", "", "", "")
+    constructor() : this("","", "","", "", "", "", "", "","")
 }
 

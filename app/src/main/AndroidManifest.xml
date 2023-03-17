@@ -21,6 +21,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BitirmeProjesi">
         <activity
+            android:name=".Activities.FollowRequestsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activities.NoticeDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".Activities.NoticesActivity"
             android:exported="false" />
         <activity

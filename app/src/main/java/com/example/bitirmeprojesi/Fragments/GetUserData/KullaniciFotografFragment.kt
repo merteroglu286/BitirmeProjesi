@@ -105,10 +105,6 @@ class KullaniciFotografFragment : Fragment() {
             cinsiyet = KullaniciFotografFragmentArgs.fromBundle(it).cinsiyet
         }
 
-        binding.txt1.text = kullaniciAdi
-        binding.txt2.text = dogumTarihi
-        binding.txt3.text = cinsiyet
-
         binding.btnBack.setOnClickListener{
             Navigation.findNavController(it).navigateUp()
         }
@@ -161,6 +157,7 @@ class KullaniciFotografFragment : Fragment() {
     private fun pickImage() {
         context?.let {
             CropImage.activity()
+                .setCropMenuCropButtonTitle(resources.getString(R.string.crop_image_save_ok))
                 .setCropShape(CropImageView.CropShape.OVAL)
                 .start(it, this)
         }

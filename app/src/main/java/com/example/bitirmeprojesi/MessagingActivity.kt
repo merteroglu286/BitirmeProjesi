@@ -1,14 +1,15 @@
 package com.example.bitirmeprojesi
 
+import android.app.PendingIntent
 import android.content.Intent
 import android.content.SharedPreferences
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
-import android.widget.Toast
-import androidx.core.view.isVisible
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,13 +21,16 @@ import com.example.bitirmeprojesi.*
 import com.example.bitirmeprojesi.Activities.UserInfoActivity
 import com.example.bitirmeprojesi.Adapters.ChatAdapter
 import com.example.bitirmeprojesi.Constants.AppConstants
-import com.example.bitirmeprojesi.R
 import com.example.bitirmeprojesi.Utils.AppUtil
 import com.example.bitirmeprojesi.ViewModels.ProfileViewModel
 import com.example.bitirmeprojesi.databinding.ActivityMessagingBinding
 import com.google.firebase.database.*
 import com.google.firebase.messaging.FirebaseMessaging
+import com.onesignal.OneSignal
+import com.onesignal.OneSignal.PostNotificationResponseHandler
+import org.json.JSONException
 import org.json.JSONObject
+
 
 class MessagingActivity : AppCompatActivity() {
 
@@ -36,6 +40,7 @@ class MessagingActivity : AppCompatActivity() {
     private var hisName : String? =  null
     private var hisImage : String? =  null
     private var myToken : String? =  null
+    private var hisToken : String? =  null
     private lateinit var appUtil : AppUtil
     private lateinit var myId : String
     private lateinit var myName : String
@@ -44,6 +49,8 @@ class MessagingActivity : AppCompatActivity() {
     var chatList = ArrayList<ChatModel>()
 
     private var lastMessage: String = ""
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +62,7 @@ class MessagingActivity : AppCompatActivity() {
         sharedPreferences = getSharedPreferences("Messages", MODE_PRIVATE)
         myImage = sharedPreferences.getString("myImage","").toString()
 
+/*
         FirebaseMessaging.getInstance().token
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -65,6 +73,8 @@ class MessagingActivity : AppCompatActivity() {
                 }
             }
 
+
+ */
         activityMessageBinding.messageRecyclerView.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         //activityMessageBinding.activity = this
 
@@ -89,6 +99,7 @@ class MessagingActivity : AppCompatActivity() {
             if(message.isEmpty()){
 
             }else{
+                sendNotification(message,hisToken.toString())
                 var reference = FirebaseDatabase.getInstance().getReference("Chat").child(myId.toString()).child(hisId.toString())
 
                 val map = mapOf(
@@ -142,6 +153,7 @@ class MessagingActivity : AppCompatActivity() {
                             referenceConversationHis.child(hisId!!).child(myId).updateChildren(map)
                         }
                     }
+
 
                 activityMessageBinding.msgText.setText("")
 
@@ -231,8 +243,8 @@ class MessagingActivity : AppCompatActivity() {
                         activityMessageBinding.status.visibility = View.VISIBLE
                     }else{
                         activityMessageBinding.status.visibility = View.GONE
-
                     }
+                    hisToken = userModel!!.token
                     //Picasso.get().load(userModel!!.image).into(activityMessageBinding.imgProfile)
                 }
             }
@@ -243,5 +255,24 @@ class MessagingActivity : AppCompatActivity() {
         })
     }
 
+    fun sendNotification(message:String,hisToken:String){
+        try {
+            OneSignal.postNotification(JSONObject("{'contents': {'en':'${message}'}, 'include_player_ids': ['" + hisToken + "']}"),
+                object : PostNotificationResponseHandler {
+                    override fun onSuccess(response: JSONObject) {
+                        Log.i("OneSignalExample", "postNotification Success: $response")
+                    }
 
+                    override fun onFailure(response: JSONObject) {
+                        Log.e("OneSignalExample", "postNotification Failure: $response")
+                    }
+                })
+
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+
+    }
+
+    
 }

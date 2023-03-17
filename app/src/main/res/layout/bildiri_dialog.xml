@@ -31,6 +31,7 @@
         android:visibility="gone"
         android:textColor="@color/main_red"/>
 
+
     <TextView
         android:id="@+id/txt"
         android:layout_width="wrap_content"
@@ -81,22 +82,45 @@
 
     </RadioGroup>
 
+    <ImageView
+        android:id="@+id/imgPickImage"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/baseline_photo_camera_24"
+        android:layout_below="@id/radioGroup"
+        android:layout_marginTop="12dp"
+        app:tint="@color/main_blue"
+        android:layout_marginHorizontal="12dp"/>
+
+    <ImageView
+        android:id="@+id/noticeImage"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="12dp"
+        android:src="@mipmap/ic_launcher"
+        android:layout_below="@id/radioGroup"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        android:layout_marginStart="60dp"/>
+
     <TextView
         android:id="@+id/bildiriOlusturBtn"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_below="@id/radioGroup"
-        android:layout_centerHorizontal="true"
-        android:layout_marginHorizontal="62dp"
+        android:layout_width="100dp"
+        android:layout_height="42dp"
         android:layout_marginTop="12dp"
-        android:background="@drawable/button_background_1"
+        android:background="@drawable/btn_in_dialog_bg"
         android:clickable="true"
         android:focusable="true"
         android:foreground="?android:attr/selectableItemBackground"
-        android:paddingHorizontal="24dp"
-        android:paddingVertical="12dp"
-        android:text="Oluştur"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="6dp"
+        android:text="Paylaş"
         android:textAlignment="center"
         android:textColor="@color/white"
-        android:textSize="24dp" />
+        android:textSize="18dp"
+        android:layout_below="@id/radioGroup"
+        android:layout_alignParentRight="true"/>
+
+
+
 </RelativeLayout>

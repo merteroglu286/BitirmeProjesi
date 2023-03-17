@@ -3,31 +3,14 @@ package com.example.bitirmeprojesi.Activities
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
-import com.android.volley.AuthFailureError
-import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
 import com.bumptech.glide.Glide
-import com.example.bitirmeprojesi.MessagingActivity
-import com.example.bitirmeprojesi.R
-import com.example.bitirmeprojesi.UserModel
+import com.example.bitirmeprojesi.*
 import com.example.bitirmeprojesi.ViewModels.ProfileViewModel
 import com.example.bitirmeprojesi.databinding.ActivityUserInfoBinding
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import okhttp3.MediaType
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
-import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
+import com.google.firebase.database.*
+import kotlinx.android.synthetic.main.delete_item_dialog.view.*
 
 class UserInfoActivity : AppCompatActivity() {
 
@@ -37,15 +20,26 @@ class UserInfoActivity : AppCompatActivity() {
     private var hisImage: String? = null
     private var hisName: String? = null
     private var hisToken: String? = null
+    private lateinit var myId : String
+    private lateinit var myName : String
+    private lateinit var myImage : String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityUserInfoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        profileViewModels = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(
-            ProfileViewModel::class.java)
+        profileViewModels =
+            ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(
+                ProfileViewModel::class.java
+            )
 
+        profileViewModels.getUser().observe(this, androidx.lifecycle.Observer { userModel ->
+            myName = userModel.username
+            myImage = userModel.image
+            myId = userModel.uid
+            getMessagingRequest(myId,hisId!!)
+        })
 
         hisId = intent.getStringExtra("hisId")
         hisImage = intent.getStringExtra("hisImage")
@@ -58,27 +52,56 @@ class UserInfoActivity : AppCompatActivity() {
 
         binding.btnMessage.setOnClickListener {
             val intent = Intent(it.context, MessagingActivity::class.java)
-            intent.putExtra("hisId",hisId.toString())
-            intent.putExtra("hisImage",hisImage.toString())
-            intent.putExtra("hisName",hisName.toString())
+            intent.putExtra("hisId", hisId.toString())
+            intent.putExtra("hisImage", hisImage.toString())
+            intent.putExtra("hisName", hisName.toString())
             it.context.startActivity(intent)
         }
 
         binding.imgProfile.setOnClickListener {
             val intent = Intent(it.context, FullscreenPhotoActivity::class.java)
-            intent.putExtra("img",hisImage)
+            intent.putExtra("img", hisImage)
             it.context.startActivity(intent)
         }
 
         binding.btnFollowed.setOnClickListener {
-            binding.linearButtons.visibility = View.VISIBLE
-            binding.btnFollowed.visibility = View.INVISIBLE
+            //binding.linearButtons.visibility = View.VISIBLE
+            //binding.btnFollowed.visibility = View.INVISIBLE
+            binding.btnFollowed.text = "Takip isteği gönderildi ✓"
+            var reference =
+                FirebaseDatabase.getInstance().getReference("Followers")
+
+            val map = mapOf(
+                "senderId" to myId,
+                "receiverId" to hisId.toString(),
+                "senderImage" to myImage,
+                "senderName" to myName,
+                "date" to System.currentTimeMillis().toString(),
+                "onaylandiMi" to false
+            )
+            reference.child(hisId!!).child(myId).updateChildren(map)
+
+                /*.addOnSuccessListener {
+                    var referenceConversationHis =
+                        FirebaseDatabase.getInstance().getReference("MessagingRequests")
+
+                    val map = mapOf(
+                        "receiverId" to myId.toString(),
+                        "receiverImage" to myImage.toString(),
+                        "receiverName" to myName.toString(),
+                        "senderId" to hisId.toString(),
+                        "date" to System.currentTimeMillis().toString(),
+                        "onaylandıMı" to false
+                    )
+                    referenceConversationHis.child(hisId!!).child(myId).updateChildren(map)
+                }
+
+                 */
+
 
         }
 
-
     }
-
     private fun getUserData(userId: String?) {
 
         val databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(userId!!)
@@ -90,6 +113,8 @@ class UserInfoActivity : AppCompatActivity() {
                     hisToken = userModel.token
                     //Picasso.get().load(userModel!!.image).into(activityUserInfoBinding.imgProfile)
                     Glide.with(applicationContext).load(userModel!!.image).into(binding.imgProfile)
+                    binding.numberOfFollowers.text = userModel.followers
+                    binding.numberOfFollowing.text = userModel.following
                 }
             }
 
@@ -97,6 +122,37 @@ class UserInfoActivity : AppCompatActivity() {
                 TODO("Not yet implemented")
             }
         })
+    }
+
+    private fun getMessagingRequest(userId: String,hisId: String) {
+
+        val databaseReference = FirebaseDatabase.getInstance().getReference("Followers").child(hisId).child(userId)
+
+        databaseReference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    val data = snapshot.getValue(FollowRequestModel::class.java)
+                    if (data!!.onaylandiMi == true){
+                        binding.btnFollowed.visibility = View.GONE
+                        binding.linearButtons.visibility = View.VISIBLE
+                    }else{
+                        binding.btnFollowed.visibility = View.VISIBLE
+                        binding.linearButtons.visibility = View.INVISIBLE
+                        binding.btnFollowed.text = "Takip isteği gönderildi ✓"
+                    }
+                }else{
+                    binding.btnFollowed.text = "Takip isteği gönder"
+                    binding.btnFollowed.visibility = View.VISIBLE
+                    binding.linearButtons.visibility = View.INVISIBLE
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+        })
+
+
     }
 
 }

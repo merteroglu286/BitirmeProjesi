@@ -6,6 +6,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
@@ -16,6 +17,7 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.messaging.FirebaseMessaging
+import com.onesignal.OneSignal
 
 
 class SplashScreenActivity : AppCompatActivity() {
@@ -45,7 +47,9 @@ class SplashScreenActivity : AppCompatActivity() {
                 FirebaseMessaging.getInstance().token
                     .addOnCompleteListener(OnCompleteListener {
                         if (it.isSuccessful) {
-                            val token = it.result!!
+                            //val token = it.result!!
+                            val token = OneSignal.getDeviceState()!!.userId
+                            Log.i("zxc",token)
                             val databaseReference =
                                 FirebaseDatabase.getInstance().getReference("Users")
                                     .child(firebaseAuth!!.currentUser!!.uid)

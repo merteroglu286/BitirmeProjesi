@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
         <variable
@@ -13,14 +13,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/degreeIcon"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_alignParentRight="true"
-            android:layout_margin="12dp"
-            android:src="@drawable/baseline_numbers_24"
-            app:tint="@color/main_red2" />
         <RelativeLayout
             android:id="@+id/contextNoticeItem"
             android:layout_width="match_parent"
@@ -100,7 +92,6 @@
             </LinearLayout>
 
         </RelativeLayout>
-
 
         <View
             android:layout_width="match_parent"

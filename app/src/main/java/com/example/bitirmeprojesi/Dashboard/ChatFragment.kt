@@ -2,8 +2,10 @@ package com.example.bitirmeprojesi.Dashboard
 
 import android.R
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,10 +15,16 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.bitirmeprojesi.Activities.FollowRequestsActivity
 import com.example.bitirmeprojesi.Adapters.DmScreenAdapter
 import com.example.bitirmeprojesi.ConversationsModel
+import com.example.bitirmeprojesi.Fragments.GetUserData.KullaniciDogumTarihiFragmentDirections
+import com.example.bitirmeprojesi.MessagingActivity
+import com.example.bitirmeprojesi.ViewModels.FollowRequestsWiewModel
 import com.example.bitirmeprojesi.ViewModels.ProfileViewModel
 import com.example.bitirmeprojesi.databinding.FragmentChatBinding
 import com.example.bitirmeprojesi.databinding.FragmentProfileBinding
@@ -30,7 +38,9 @@ class ChatFragment : Fragment() {
     private var _binding: FragmentChatBinding? = null
     private val chatBinding get() = _binding!!
     private lateinit var profileViewModels: ProfileViewModel
-
+    private val followRequestsViewModel by lazy {
+        ViewModelProvider(this).get(FollowRequestsWiewModel::class.java)
+    }
 
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var databaseReference: DatabaseReference
@@ -41,6 +51,7 @@ class ChatFragment : Fragment() {
 
     //private lateinit var messageArrayList: MutableList<ConversationsModel>
     private lateinit var conversationsArrayList: ArrayList<ConversationsModel>
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -59,14 +70,29 @@ class ChatFragment : Fragment() {
 
         profileViewModels.getUser().observe(viewLifecycleOwner, Observer {  userModel ->
             chatBinding.userModel = userModel
-
-
         })
+
+
+        // ViewModel sınıfındaki requestsLiveData değişkenini gözlemle
+        followRequestsViewModel.requestsLiveData.observe(viewLifecycleOwner, Observer { requestsList ->
+            // requestsList, FollowRequestModel nesneleri içeren bir List nesnesidir
+            // Listenin uzunluğunu ekrana yazdırabilirsiniz
+            chatBinding.numberOfRequest.text = requestsList.size.toString()
+        })
+
+        // Verileri Firebase'den yükle
+        followRequestsViewModel.getDataFromFirebase()
 
         recyclerView = chatBinding.dmRecyclerView
 
         //messageArrayList = arrayListOf<ConversationsModel>()
         conversationsArrayList = arrayListOf<ConversationsModel>()
+
+
+        chatBinding.btnFollowRequests.setOnClickListener {
+            val intent = Intent(it.context, FollowRequestsActivity::class.java)
+            startActivity(intent)
+        }
 
 
         var editor = sharedPreferences.edit()
@@ -134,6 +160,7 @@ class ChatFragment : Fragment() {
 
         return chatBinding.root
     }
+
 
     fun checkIfFragmentAttached(operation: Context.() -> Unit) {
         if (isAdded && context != null) {

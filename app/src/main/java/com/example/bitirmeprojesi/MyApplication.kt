@@ -5,7 +5,10 @@ import android.util.Log
 import androidx.lifecycle.*
 import com.example.bitirmeprojesi.ViewModels.ProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
+import com.onesignal.OneSignal
 
+
+const val ONESIGNAL_APP_ID = "a646096c-9c19-4b02-b907-4b426ef2e0a7"
 class MyApplication : Application(), LifecycleObserver {
     private lateinit var profileViewModels: ProfileViewModel
     private var firebaseAuth: FirebaseAuth? = null
@@ -17,7 +20,16 @@ class MyApplication : Application(), LifecycleObserver {
             profileViewModels = ViewModelProvider.AndroidViewModelFactory.getInstance(this).create(
                 ProfileViewModel::class.java)
         }
+
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+
+        // Logging set to help debug issues, remove before releasing your app.
+        OneSignal.setLogLevel(OneSignal.LOG_LEVEL.VERBOSE, OneSignal.LOG_LEVEL.NONE)
+
+        // OneSignal Initialization
+        OneSignal.initWithContext(this)
+        OneSignal.setAppId(ONESIGNAL_APP_ID)
+
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)

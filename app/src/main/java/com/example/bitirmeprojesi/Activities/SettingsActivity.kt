@@ -7,12 +7,14 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.example.bitirmeprojesi.Constants.AppConstants
 import com.example.bitirmeprojesi.Permissions.AppPermission
 import com.example.bitirmeprojesi.R
@@ -58,49 +60,45 @@ class SettingsActivity : AppCompatActivity() {
         profileViewModels.getUser().observe(this, Observer {  userModel ->
             binding.userModel = userModel
         })
+        val userModel = profileViewModels.getUser().value
+        Glide.with(this).load(userModel!!.image).into(binding.imgUser)
+
         binding.logOut.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
             startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
 
-        binding.imgPickImage.setOnClickListener{
-            /*if(appPermission.isStorageOk(this)){
-                pickImage()
-            }
 
-             */
-            openGallery()
-        }
-
-
-
-/*
         binding.imgPickImage.setOnClickListener {
-            if (checkStoragePermission()){
+            if (checkStoragePermission())
                 pickImage()
-                storageReference!!.child(firebaseAuth!!.uid + AppConstants.PATH).putFile(image!!)
-                    .addOnSuccessListener {
-                        val task = it.storage.downloadUrl
-                        task.addOnCompleteListener { uri ->
-                            imageUrl = uri.result.toString()
-                            uid = firebaseAuth!!.uid!!.toString()
-                            val map = mapOf(
-                                "image" to imageUrl,
-                            )
-                            databaseReference!!.child(firebaseAuth!!.uid!!).updateChildren(map)
-                        }
-                    }
-            }
             else storageRequestPermission()
         }
 
- */
 
         binding.profileDuzenleKaydet.setOnClickListener {
             var kullaniciAdi: String = binding.editUserName.text.toString()
             var cinsiyet: String = binding.editUserGender.text.toString()
             var dogumTarihi: String = binding.editUserBirthday.text.toString()
+
+            if (storageReference != null){
+                if (image != null){
+                    storageReference!!.child(firebaseAuth!!.uid + AppConstants.PATH).putFile(image!!)
+                        .addOnSuccessListener {
+                            val task = it.storage.downloadUrl
+                            task.addOnCompleteListener { uri ->
+                                imageUrl = uri.result.toString()
+                                uid = firebaseAuth!!.uid!!.toString()
+                                val map = mapOf(
+                                    "image" to imageUrl,
+                                )
+                                databaseReference!!.child(firebaseAuth!!.uid!!).updateChildren(map)
+                            }
+                        }
+                }
+
+            }
 
             val map = mapOf(
                 "username" to kullaniciAdi,
@@ -112,7 +110,6 @@ class SettingsActivity : AppCompatActivity() {
         }
 
     }
-
 
     private fun checkStoragePermission(): Boolean {
         return ContextCompat.checkSelfPermission(
@@ -143,7 +140,7 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-/*
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
@@ -158,42 +155,19 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-
- */
     private fun pickImage() {
-        this.let {
-            CropImage.activity()
-                .setCropShape(CropImageView.CropShape.OVAL)
-                .start(it)
+        CropImage.activity()
+            .setCropMenuCropButtonTitle(resources.getString(R.string.crop_image_save_ok))
+            .setCropShape(CropImageView.CropShape.OVAL)
+            .start(this)
+    }
+
+    private fun loading(isLoading:Boolean){
+
+        if(isLoading){
+            binding.progressBar.visibility = View.VISIBLE
+        }else{
+            binding.progressBar.visibility = View.GONE
         }
     }
-
-    private val REQUEST_CODE_GALLERY = 100
-    private lateinit var imageView: CircleImageView
-
-    private fun openGallery() {
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
-        startActivityForResult(intent, REQUEST_CODE_GALLERY)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_GALLERY) {
-            val imageUri = data?.data
-            binding.imgUser.setImageURI(imageUri)
-            storageReference?.child(firebaseAuth!!.uid + AppConstants.PATH)
-                ?.putFile(imageUri!!)
-                ?.addOnSuccessListener { taskSnapshot ->
-                    taskSnapshot.storage.downloadUrl.addOnSuccessListener {
-                        imageUrl = it.toString()
-                        uid = firebaseAuth?.uid!!
-                        val map = mapOf("image" to imageUrl)
-                        databaseReference?.child(uid)?.updateChildren(map)
-                    }
-                }
-        }
-    }
-
-
 }

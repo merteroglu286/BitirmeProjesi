@@ -108,6 +108,8 @@ class VerifyNumberFragment : Fragment() {
                                 editor2.putString("image",user.image)
                                 editor2.putString("uid",user.uid)
                                 editor2.putString("status",user.status)
+                                editor2.putString("followers",user.followers)
+                                editor2.putString("following",user.following)
                                 editor2.putBoolean("kayitliMi",true)
                                 editor2.apply()
 

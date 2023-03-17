@@ -115,7 +115,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="100"
+                    android:text="@{userModel.followers,default=notify}"
                     android:textSize="18dp" />
 
                 <TextView
@@ -123,7 +123,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="right"
-                    android:text="150"
+                    android:text="@{userModel.following,default=notify}"
                     android:textAlignment="center"
                     android:textSize="18dp"
                     tools:ignore="RtlCompat" />

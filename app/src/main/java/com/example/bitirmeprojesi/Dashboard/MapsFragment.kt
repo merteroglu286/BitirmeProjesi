@@ -2,14 +2,18 @@ package com.example.bitirmeprojesi.Dashboard
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.net.Uri
 import androidx.fragment.app.Fragment
 
 import android.os.Bundle
@@ -28,13 +32,8 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.Navigation
 import com.example.bitirmeprojesi.Activities.NoticesActivity
-import com.example.bitirmeprojesi.Activities.UserInfoActivity
 import com.example.bitirmeprojesi.Constants.AppConstants
-import com.example.bitirmeprojesi.Fragments.GetUserData.KullaniciAdiFragmentDirections
-import com.example.bitirmeprojesi.Fragments.NoticesFragment
-import com.example.bitirmeprojesi.Fragments.VerifyNumberFragment
 import com.example.bitirmeprojesi.R
 import com.example.bitirmeprojesi.ViewModels.BlackListViewModel
 import com.example.bitirmeprojesi.ViewModels.NoticeViewModel
@@ -49,10 +48,17 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import com.theartofdev.edmodo.cropper.CropImage
+import com.theartofdev.edmodo.cropper.CropImageView
 import kotlinx.android.synthetic.main.bildiri_dialog.*
+import kotlin.math.roundToInt
 
-class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListener {
+class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListener,
+    GoogleMap.OnCameraIdleListener{
 
     private var _binding: FragmentMapsBinding? = null
     private val binding get() = _binding!!
@@ -69,10 +75,18 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
     private lateinit var username:String
     private lateinit var userImage:String
     private lateinit var userID:String
+    private  var noticeImageUri: Uri? = null
+    private lateinit var noticeImageUrl:String
+
+    private var storageReference: StorageReference? = null
+    private var databaseReference: DatabaseReference? = null
 
     private var noticeDegree : String = "green"
+    private var zoomLevel = 0f
+    private var markerSize = 100
 
     val blackList = ArrayList<String>()
+    private val markers = mutableListOf<Marker>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,7 +109,7 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                 googleMap -> mMap = googleMap
                 onMapReady(googleMap)
 
-
+            storageReference = FirebaseStorage.getInstance().reference
             blackListViewModel = ViewModelProviders.of(this@MapsFragment).get(BlackListViewModel::class.java)
             blackListViewModel.getDataFromAPI()
             getBlackList()
@@ -175,7 +189,7 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
         noticeViewModel = ViewModelProviders.of(this@MapsFragment).get(NoticeViewModel::class.java)
         noticeViewModel.getDataFromFirebase()
 
-        locationLiveData()
+        locationLiveData(mMap)
 
         locationManager = activity?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         locationListener = object : LocationListener{
@@ -234,6 +248,12 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                         override fun afterTextChanged(s: Editable?) {}
                     })
 
+                    dialogBinding.imgPickImage.setOnClickListener{
+                        if (checkStoragePermission())
+                            pickImage()
+                        else storageRequestPermission()
+                    }
+
 
 
                     dialogBinding.bildiriOlusturBtn.setOnClickListener {
@@ -254,18 +274,47 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                             }
 
                              */
-                            val map = mapOf(
-                                "username" to username,
-                                "userID" to userID,
-                                "latitude" to konum.latitude.toString(),
-                                "longitude" to konum.longitude.toString(),
-                                "noticeMessage" to dialogBinding.messageEdittext.text.toString(),
-                                "noticeImage" to "",
-                                "userImage" to userImage,
-                                "noticeDegree" to noticeDegree,
-                            )
 
-                            FirebaseDatabase.getInstance().getReference("Locations")!!.child(FirebaseAuth.getInstance().uid!!.toString()).updateChildren(map)
+                            val timestamp = System.currentTimeMillis().toString()
+
+                            if (noticeImageUri != null){
+                                storageReference!!.child(userID + "/SharedPhotos/${timestamp}").putFile(noticeImageUri!!)
+                                    .addOnSuccessListener {
+                                        val task = it.storage.downloadUrl
+                                        task.addOnCompleteListener { uri ->
+                                            noticeImageUrl = uri.result.toString()
+                                            val map = mapOf(
+                                                "username" to username,
+                                                "userID" to userID,
+                                                "latitude" to konum.latitude.toString(),
+                                                "longitude" to konum.longitude.toString(),
+                                                "noticeID" to userID+timestamp,
+                                                "noticeMessage" to dialogBinding.messageEdittext.text.toString(),
+                                                "userImage" to userImage,
+                                                "noticeDegree" to noticeDegree,
+                                                "noticeTime" to timestamp,
+                                                "noticeImage" to noticeImageUrl,
+                                            )
+                                            FirebaseDatabase.getInstance().getReference("Notices").push().setValue(map)
+                                        }
+                                    }
+                            }else{
+                                val map = mapOf(
+                                    "username" to username,
+                                    "userID" to userID,
+                                    "latitude" to konum.latitude.toString(),
+                                    "longitude" to konum.longitude.toString(),
+                                    "noticeID" to userID+timestamp,
+                                    "noticeMessage" to dialogBinding.messageEdittext.text.toString(),
+                                    "userImage" to userImage,
+                                    "noticeDegree" to noticeDegree,
+                                    "noticeTime" to timestamp
+                                )
+
+                                FirebaseDatabase.getInstance().getReference("Notices").push().setValue(map)
+                            }
+
+
                             dialog.dismiss()
 
                         }
@@ -317,6 +366,9 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
 
         }
 
+        // set listeners for camera movements
+        mMap.setOnCameraIdleListener(this)
+
         if (ContextCompat.checkSelfPermission(requireContext(),Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 AppConstants.LOCATION_PERMISSION)
@@ -326,25 +378,104 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
 
     }
 
-    fun locationLiveData(){
+    private fun updateCounter(zoom: Int) {
+        markerSize = when (zoom) {
+            1 -> 1
+            2 -> 1
+            3 -> 1
+            4 -> 30
+            5 -> 35
+            6 -> 40
+            7 -> 45
+            8 -> 50
+            9 -> 55
+            10 -> 60
+            11 -> 65
+            12 -> 70
+            13 -> 75
+            14 -> 80
+            15 -> 85
+            16 -> 90
+            17 -> 95
+            else -> 100
+        }
+/*
+        binding.sayac.text = when (zoom) {
+            1 -> "1"
+            2 -> "2"
+            3 -> "3"
+            4 -> "4"
+            5 -> "5"
+            6 -> "6"
+            7 -> "7"
+            8 -> "8"
+            9 -> "9"
+            10 -> "10"
+            11 -> "11"
+            12 -> "12"
+            13 -> "13"
+            14 -> "14"
+            15 -> "15"
+            16 -> "16"
+            17 -> "17"
+            else -> "0"
+        }
+
+ */
+    }
+
+    fun locationLiveData(mMap : GoogleMap){
         noticeViewModel.noticesLiveData.observe(viewLifecycleOwner, Observer { notices ->
             notices?.let{
                 if (notices.isNotEmpty()){
                     for (notice in notices){
-                        var color = BitmapDescriptorFactory.HUE_GREEN
+                        var markerBitmap: Bitmap
+                        // var color = BitmapDescriptorFactory.HUE_GREEN
                         if (notice.noticeDegree == "green"){
-                            color = BitmapDescriptorFactory.HUE_GREEN
+                           // color = BitmapDescriptorFactory.HUE_GREEN
+                            markerBitmap = BitmapFactory.decodeResource(resources, R.drawable.marker_green)
+                            val resizedMarkerBitmap = Bitmap.createScaledBitmap(markerBitmap, markerSize, markerSize, false)
+                            val markerOptions = MarkerOptions()
+                                .position(LatLng(ParseDouble(notice.latitude),ParseDouble(notice.longitude)))
+                                .title(notice.username)
+                                .icon(BitmapDescriptorFactory.fromBitmap(resizedMarkerBitmap))
+                            val marker = mMap.addMarker(markerOptions)
+
+                            marker?.tag = "green"
+
+                            marker?.let { it1 -> markers.add(it1) }
                         }
                         if (notice.noticeDegree == "yellow"){
-                            color = BitmapDescriptorFactory.HUE_YELLOW
+                           // color = BitmapDescriptorFactory.HUE_YELLOW
+                            markerBitmap = BitmapFactory.decodeResource(resources, R.drawable.marker_yellow)
+                            val resizedMarkerBitmap = Bitmap.createScaledBitmap(markerBitmap, markerSize, markerSize, false)
+                            val markerOptions = MarkerOptions()
+                                .position(LatLng(ParseDouble(notice.latitude),ParseDouble(notice.longitude)))
+                                .title(notice.username)
+                                .icon(BitmapDescriptorFactory.fromBitmap(resizedMarkerBitmap))
+                            val marker = mMap.addMarker(markerOptions)
+
+                            marker?.tag = "yellow"
+
+                            marker?.let { it1 -> markers.add(it1) }
                         }
                         if (notice.noticeDegree == "red"){
-                            color = BitmapDescriptorFactory.HUE_RED
-                        }
-                        val marker = mMap.addMarker(
-                            MarkerOptions().position(LatLng(ParseDouble(notice.latitude),ParseDouble(notice.longitude)))
+                           // color = BitmapDescriptorFactory.HUE_RED
+                            markerBitmap = BitmapFactory.decodeResource(resources, R.drawable.marker_red)
+                            val resizedMarkerBitmap = Bitmap.createScaledBitmap(markerBitmap, markerSize, markerSize, false)
+                            val markerOptions = MarkerOptions()
+                                .position(LatLng(ParseDouble(notice.latitude),ParseDouble(notice.longitude)))
                                 .title(notice.username)
-                                .icon(BitmapDescriptorFactory.defaultMarker(color)))
+                                .icon(BitmapDescriptorFactory.fromBitmap(resizedMarkerBitmap))
+                            val marker = mMap.addMarker(markerOptions)
+
+                            marker?.tag = "red"
+
+                            marker?.let { it1 -> markers.add(it1) }
+                        }
+
+                        //updateCounter(mMap.cameraPosition.zoom.roundToInt())
+
 
                     }
 
@@ -404,9 +535,84 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
             return 0.0
         }
     }
+
+    private fun checkStoragePermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun storageRequestPermission() = ActivityCompat.requestPermissions(
+        requireActivity(),
+        arrayOf(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ), 1000
+    )
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            1000 ->
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    pickImage()
+                else Toast.makeText(requireContext(), "Storage permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE -> {
+                val result = CropImage.getActivityResult(data)
+                if (resultCode == Activity.RESULT_OK) {
+                    noticeImageUri = result.uri
+                    dialogBinding.noticeImage.setImageURI(noticeImageUri)
+                    dialogBinding.noticeImage.visibility = View.VISIBLE
+                }
+            }
+        }
+    }
+
+    private fun pickImage() {
+        context?.let {
+            CropImage.activity()
+                .setCropMenuCropButtonTitle(resources.getString(R.string.crop_image_save_ok))
+                .setCropShape(CropImageView.CropShape.RECTANGLE)
+                .setAspectRatio(4, 3)
+                .start(it, this)
+        }
+    }
     override fun onDestroy() {
         super.onDestroy()
         val fab = activity?.findViewById<FloatingActionButton>(R.id.bottomBarFabMap)
         fab!!.isVisible = true
+    }
+
+    override fun onCameraIdle() {
+        updateCounter(mMap.cameraPosition.zoom.roundToInt())
+        for (marker in markers) {
+            if (marker.tag == "green"){
+                val markerBitmap = BitmapFactory.decodeResource(resources, R.drawable.marker_green)
+                val resizedMarkerBitmap = Bitmap.createScaledBitmap(markerBitmap, markerSize, markerSize, false)
+                marker.setIcon(BitmapDescriptorFactory.fromBitmap(resizedMarkerBitmap))
+            }
+            else if(marker.tag == "yellow"){
+                val markerBitmap = BitmapFactory.decodeResource(resources, R.drawable.marker_yellow)
+                val resizedMarkerBitmap = Bitmap.createScaledBitmap(markerBitmap, markerSize, markerSize, false)
+                marker.setIcon(BitmapDescriptorFactory.fromBitmap(resizedMarkerBitmap))
+            }else{
+                val markerBitmap = BitmapFactory.decodeResource(resources, R.drawable.marker_red)
+                val resizedMarkerBitmap = Bitmap.createScaledBitmap(markerBitmap, markerSize, markerSize, false)
+                marker.setIcon(BitmapDescriptorFactory.fromBitmap(resizedMarkerBitmap))
+            }
+
+        }
     }
 }

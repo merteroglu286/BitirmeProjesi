@@ -11,20 +11,18 @@ import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.bitirmeprojesi.Activities.FullscreenPhotoActivity
 import com.example.bitirmeprojesi.Activities.SettingsActivity
-import com.example.bitirmeprojesi.R
 import com.example.bitirmeprojesi.UserModel
 import com.example.bitirmeprojesi.ViewModels.ProfileViewModel
 import com.example.bitirmeprojesi.databinding.FragmentProfileBinding
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 
 class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
     private lateinit var profileViewModels: ProfileViewModel
     private lateinit var imageUrl: String
+    private lateinit var userId: String
+    private  var onaylandiMi: Boolean = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -55,6 +53,7 @@ class ProfileFragment : Fragment() {
             intent.putExtra("img",imageUrl)
             it.context.startActivity(intent)
         }
+
 
         return binding.root
     }

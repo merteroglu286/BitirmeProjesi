@@ -17,7 +17,33 @@ class NoticeViewModel: ViewModel() {
 
         val noticesList = arrayListOf<NoticeModel>()
 
-        val databaseReference = FirebaseDatabase.getInstance().getReference("Locations")
+        val databaseReference = FirebaseDatabase.getInstance().getReference("Notices")
+
+        databaseReference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                noticesList.clear()
+                for (data in snapshot.children) {
+                    val noticeModel = data.getValue(NoticeModel::class.java)
+                    noticeModel?.let {
+                        noticesList.add(noticeModel)
+                    }
+                }
+                noticesLiveData.value = noticesList
+                noticeError.value = false
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                noticeError.value = true
+            }
+        })
+
+    }
+
+    fun getUserNoticeFromFirebase(uid:String) {
+
+        val noticesList = arrayListOf<NoticeModel>()
+
+        val databaseReference = FirebaseDatabase.getInstance().getReference("Locations").child(uid)
 
         databaseReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {

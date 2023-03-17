@@ -1,0 +1,239 @@
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="noticeModel"
+            type="com.example.bitirmeprojesi.NoticeModel" />
+    </data>
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/contextNoticeItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/border_notice_detail_green"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="24dp">
+
+            <LinearLayout
+                android:id="@+id/linearContext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="4dp">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/imgContactItem"
+                    imageUrl="@{noticeModel.userImage}"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:src="@drawable/user_placeholder" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tvName"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="start"
+                            android:text="@{noticeModel.username , default=Nothing}"
+                            android:textColor="@color/black"
+                            android:textSize="16dp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+
+                    <TextView
+                        android:id="@+id/tvMsg"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:maxHeight="120dp"
+                        android:text="@{noticeModel.noticeMessage, default = Nothing}"
+                        android:textSize="16dp" />
+
+                    <ImageView
+                        android:id="@+id/noticeImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:layout_marginTop="8dp"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/user_placeholder"
+                        android:visibility="gone" />
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/linearContext"
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="64dp"
+
+                >
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/baseline_exposure_plus_1_24"
+                    app:tint="@color/main_red"
+                    android:layout_marginEnd="12dp"/>
+                <ImageView
+                    android:id="@+id/btnComment"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_baseline_chat_24"
+                    app:tint="@color/main_red"
+                    android:foreground="?android:attr/selectableItemBackground"/>
+
+
+            </LinearLayout>
+            <TextView
+                android:id="@+id/tvTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/linearContext"
+                android:layout_alignParentEnd="true"
+                android:layout_marginVertical="12dp"
+                android:layout_marginEnd="4dp"
+                android:text="00:00"
+                android:textSize="16dp" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/linearFollowAndComment"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:layout_below="@id/contextNoticeItem"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:padding="4dp"
+                android:src="@drawable/baseline_exposure_plus_1_24"
+                />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/main_gray" />
+
+            <TextView
+                android:id="@+id/txtComment"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:text="Yorum Yap"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:paddingVertical="10dp"
+                android:textSize="16dp"
+                android:textStyle="bold"
+                />
+
+        </LinearLayout>
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/linearFollowAndComment"
+            android:layout_above="@id/commentLinear"/>
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/main_gray"
+            android:layout_below="@id/contextNoticeItem"
+            android:visibility="gone"
+            />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/main_gray"
+            android:visibility="gone"
+            android:layout_below="@id/linearFollowAndComment"
+            />
+
+        <LinearLayout
+            android:id="@+id/commentLinear"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal"
+            android:background="#80DBE5E6"
+            android:paddingVertical="12dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:id="@+id/messageLayout"
+                android:layout_width="310dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginStart="18dp"
+                android:background="@drawable/message_edittext_send_background">
+
+                <EditText
+                    android:id="@+id/commentEdt"
+                    android:layout_width="290dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="3dp"
+                    android:background="@drawable/bg_edittext"
+                    android:hint="Bir yorum yazın"
+                    android:inputType="textMultiLine"
+                    android:paddingVertical="12dp"
+                    android:paddingStart="16dp"
+                    android:scrollbars="vertical" />
+
+
+            </LinearLayout>
+
+
+            <ImageView
+                android:id="@+id/btnSend"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_background_1"
+                android:padding="10dp"
+                android:layout_marginStart="12dp"
+                android:src="@drawable/ic_baseline_send_24"
+                app:tint="@color/white" />
+
+
+        </LinearLayout>
+    </RelativeLayout>
+
+
+</layout>

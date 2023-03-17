@@ -23,4 +23,6 @@
     <color name="mtrl_textinput_default_box_stroke_color" tools:override="true">@color/lightBlue</color>
     <color name="blue_2">#FF5CC4F3</color>
     <color name="lightGray">#C8E1E0DD</color>
+    <color name="cayYesili">#D0F0C0 </color>
+    <color name="mainYellow">#FFD600 </color>
 </resources>

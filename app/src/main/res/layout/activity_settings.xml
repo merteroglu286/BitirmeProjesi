@@ -48,8 +48,7 @@
                         android:id="@+id/imgUser"
                         android:layout_width="100dp"
                         android:layout_height="100dp"
-                        android:layout_gravity="center"
-                        imageUrl="@{userModel.image}" />
+                        android:layout_gravity="center"/>
 
                     <ImageView
                         android:id="@+id/imgPickImage"
@@ -162,6 +161,18 @@
 
 
         </LinearLayout>
+        <RelativeLayout
+            android:id="@+id/progressBar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#73A7A7A7"
+            android:visibility="invisible">
+            <ProgressBar
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_centerInParent="true"
+                android:indeterminateTint="@color/main_blue" />
+        </RelativeLayout>
 
     </RelativeLayout>
 </layout>
