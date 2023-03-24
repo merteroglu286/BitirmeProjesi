@@ -77,7 +77,12 @@ class ChatFragment : Fragment() {
         followRequestsViewModel.requestsLiveData.observe(viewLifecycleOwner, Observer { requestsList ->
             // requestsList, FollowRequestModel nesneleri içeren bir List nesnesidir
             // Listenin uzunluğunu ekrana yazdırabilirsiniz
-            chatBinding.numberOfRequest.text = requestsList.size.toString()
+            if (requestsList.isNotEmpty()){
+                chatBinding.numberOfRequest.text = requestsList.size.toString()
+                chatBinding.numberOfRequest.visibility = View.VISIBLE
+            }else{
+                chatBinding.numberOfRequest.visibility = View.INVISIBLE
+            }
         })
 
         // Verileri Firebase'den yükle

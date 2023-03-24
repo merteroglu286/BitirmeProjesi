@@ -75,7 +75,9 @@ class UserInfoActivity : AppCompatActivity() {
                 "senderId" to myId,
                 "receiverId" to hisId.toString(),
                 "senderImage" to myImage,
+                "receiverImage" to hisImage,
                 "senderName" to myName,
+                "receiverName" to hisName,
                 "date" to System.currentTimeMillis().toString(),
                 "onaylandiMi" to false
             )
@@ -113,8 +115,9 @@ class UserInfoActivity : AppCompatActivity() {
                     hisToken = userModel.token
                     //Picasso.get().load(userModel!!.image).into(activityUserInfoBinding.imgProfile)
                     Glide.with(applicationContext).load(userModel!!.image).into(binding.imgProfile)
-                    binding.numberOfFollowers.text = userModel.followers
-                    binding.numberOfFollowing.text = userModel.following
+                    binding.countOfFollowers.text = userModel.followers
+                    binding.countOfFollowing.text = userModel.following
+                    binding.countOfNotices.text = userModel.notices
                 }
             }
 

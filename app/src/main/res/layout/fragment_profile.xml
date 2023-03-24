@@ -101,7 +101,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="left"
-                    android:text="15"
+                    android:text="@{userModel.notices,default=notify}"
                     android:textAlignment="center"
                     android:textSize="18dp"
                     tools:ignore="RtlCompat" />
@@ -111,6 +111,7 @@
                     android:layout_height="wrap_content" />
 
                 <TextView
+                    android:id="@+id/countFollowers"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -119,6 +120,7 @@
                     android:textSize="18dp" />
 
                 <TextView
+                    android:id="@+id/countOfFollowing"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"

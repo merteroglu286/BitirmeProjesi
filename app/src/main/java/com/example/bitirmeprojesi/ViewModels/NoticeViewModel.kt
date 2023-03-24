@@ -28,6 +28,7 @@ class NoticeViewModel: ViewModel() {
                         noticesList.add(noticeModel)
                     }
                 }
+                noticesList.reverse()
                 noticesLiveData.value = noticesList
                 noticeError.value = false
             }

@@ -80,7 +80,10 @@ class KullaniciFotografFragment : Fragment() {
                             "birthday" to dogumTarihi,
                             "image" to imageUrl,
                             "uid" to uid,
-                            "kayitliMi" to true
+                            "kayitliMi" to true,
+                            "followers" to "0",
+                            "following" to "0",
+                            "notices" to "0"
                         )
                         databaseReference!!.child(firebaseAuth!!.uid!!).updateChildren(map)
 

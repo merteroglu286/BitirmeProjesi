@@ -151,8 +151,6 @@ class FollowRequestsAdapter(val requestList: MutableList<FollowRequestModel>, co
                     if (userModel != null) {
                         receiverFollowers = userModel.followers
                         receiverFollowing = userModel.following
-                        Log.i("zxc","receiverFollowers" + receiverFollowers)
-                        Log.i("zxc","receiverFollowing" + receiverFollowing)
                     }
                     //Picasso.get().load(userModel!!.image).into(activityMessageBinding.imgProfile)
                 }
@@ -174,8 +172,6 @@ class FollowRequestsAdapter(val requestList: MutableList<FollowRequestModel>, co
                     if (userModel != null) {
                         senderFollowers = userModel.followers
                         senderFollowing = userModel.following
-                        Log.i("zxc","senderFollowers" + senderFollowers)
-                        Log.i("zxc","senderFollowing" + senderFollowing)
                     }
                     //Picasso.get().load(userModel!!.image).into(activityMessageBinding.imgProfile)
                 }

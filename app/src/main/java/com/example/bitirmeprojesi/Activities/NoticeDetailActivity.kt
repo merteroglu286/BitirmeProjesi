@@ -119,6 +119,10 @@ class NoticeDetailActivity : AppCompatActivity() {
         getNoticeFromFirebase(noticeID.toString())
 
 
+        binding.recycler.setOnTouchListener { _, _ ->
+            true
+        }
+
     }
 
     fun getNoticeFromFirebase(noticeID:String){
@@ -135,13 +139,18 @@ class NoticeDetailActivity : AppCompatActivity() {
                             binding.noticeModel = noticeModel
                             if (noticeModel.noticeDegree == "green"){
                                 binding.contextNoticeItem.background = this@NoticeDetailActivity.resources.getDrawable(R.drawable.border_notice_detail_green)
-
+                                binding.btnLike.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.main_green), PorterDuff.Mode.SRC_IN)
+                                binding.btnComment.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.main_green), PorterDuff.Mode.SRC_IN)
                             }
                             if (noticeModel.noticeDegree == "yellow"){
                                 binding.contextNoticeItem.background = this@NoticeDetailActivity.resources.getDrawable(R.drawable.border_notice_detail_yellow)
+                                binding.btnLike.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.mainYellow), PorterDuff.Mode.SRC_IN)
+                                binding.btnComment.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.mainYellow), PorterDuff.Mode.SRC_IN)
                             }
                             if (noticeModel.noticeDegree == "red"){
                                 binding.contextNoticeItem.background = this@NoticeDetailActivity.resources.getDrawable(R.drawable.border_notice_detail_red)
+                                binding.btnLike.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.main_red2), PorterDuff.Mode.SRC_IN)
+                                binding.btnComment.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.main_red2), PorterDuff.Mode.SRC_IN)
                             }
 
                             var currentTime = System.currentTimeMillis()

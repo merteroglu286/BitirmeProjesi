@@ -13,8 +13,9 @@ data class UserModel(
     val gender: String = "",
     val birthday : String = "",
     val kayitliMi : Boolean = false,
-    val followers : String = "", // takipçi
-    val following : String = ""  // takip edilen
+    val followers : String = "0", // takipçi
+    val following : String = "0",  // takip edilen
+    val notices : String = "0"
 ){
 
 

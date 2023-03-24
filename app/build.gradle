@@ -96,6 +96,7 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxandroid:$rxJavaVersion"
 
     implementation 'com.onesignal:OneSignal:[4.0.0, 4.99.99]'
-
+    implementation 'com.google.maps.android:android-maps-utils:2.2.0'
+    implementation 'com.squareup.picasso:picasso:2.8'
 
 }

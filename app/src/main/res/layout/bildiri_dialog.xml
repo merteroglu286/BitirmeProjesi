@@ -92,16 +92,33 @@
         app:tint="@color/main_blue"
         android:layout_marginHorizontal="12dp"/>
 
-    <ImageView
-        android:id="@+id/noticeImage"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="12dp"
-        android:src="@mipmap/ic_launcher"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinatorLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_below="@id/radioGroup"
-        android:scaleType="fitCenter"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="12dp"
         android:visibility="gone"
-        android:layout_marginStart="60dp"/>
+        >
+        <ImageView
+            android:id="@+id/noticeImage"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@mipmap/ic_launcher"
+            android:scaleType="fitCenter"
+            />
+
+        <ImageView
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:src="@drawable/ic_baseline_close_24"
+            app:layout_anchor="@id/noticeImage"
+            app:layout_anchorGravity="end"
+            app:tint="@color/main_gray"/>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+
 
     <TextView
         android:id="@+id/bildiriOlusturBtn"

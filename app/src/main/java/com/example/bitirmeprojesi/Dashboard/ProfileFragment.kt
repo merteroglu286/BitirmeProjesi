@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
+import com.example.bitirmeprojesi.Activities.FollowActivity
+import com.example.bitirmeprojesi.Activities.FollowRequestsActivity
 import com.example.bitirmeprojesi.Activities.FullscreenPhotoActivity
 import com.example.bitirmeprojesi.Activities.SettingsActivity
 import com.example.bitirmeprojesi.UserModel
@@ -53,7 +55,16 @@ class ProfileFragment : Fragment() {
             intent.putExtra("img",imageUrl)
             it.context.startActivity(intent)
         }
-
+        binding.countFollowers.setOnClickListener {
+            val intent = Intent(it.context, FollowActivity::class.java)
+            intent.putExtra("TYPE",0)
+            startActivity(intent)
+        }
+        binding.countOfFollowing.setOnClickListener {
+            val intent = Intent(it.context, FollowActivity::class.java)
+            intent.putExtra("TYPE",1)
+            startActivity(intent)
+        }
 
         return binding.root
     }

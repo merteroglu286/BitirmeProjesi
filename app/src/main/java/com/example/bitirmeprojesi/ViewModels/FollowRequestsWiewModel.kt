@@ -12,11 +12,13 @@ import com.google.firebase.database.ValueEventListener
 
 class FollowRequestsWiewModel : ViewModel() {
     val requestsLiveData = MutableLiveData<List<FollowRequestModel>>()
+    val followersLiveData = MutableLiveData<List<FollowRequestModel>>()
     val requestsError = MutableLiveData<Boolean>()
 
     fun getDataFromFirebase() {
 
         val requestsList = arrayListOf<FollowRequestModel>()
+        val followersList = arrayListOf<FollowRequestModel>()
 
         val databaseReference =
             FirebaseAuth.getInstance().currentUser?.uid?.let {
@@ -31,12 +33,19 @@ class FollowRequestsWiewModel : ViewModel() {
                 for (data in snapshot.children) {
                     val followRequestsWiewModel = data.getValue(FollowRequestModel::class.java)
                     followRequestsWiewModel?.let {
+
                         if (followRequestsWiewModel.onaylandiMi == false){
                             requestsList.add(followRequestsWiewModel)
+                        }else{
+                            followersList.add(followRequestsWiewModel)
                         }
+
                     }
                 }
+                requestsList.reverse()
+                followersList.reverse()
                 requestsLiveData.value = requestsList
+                followersLiveData.value = followersList
                 requestsError.value = false
             }
 

@@ -12,6 +12,10 @@ class ProfileViewModel:ViewModel() {
         return appRepo.getUser()
     }
 
+    fun getHisUser(uid:String): LiveData<UserModel> {
+        return appRepo.getHisUser(uid)
+    }
+
     fun updateStatus(status: String) {
         appRepo.updateStatus(status)
     }
