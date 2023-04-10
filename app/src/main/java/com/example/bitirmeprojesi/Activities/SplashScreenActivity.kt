@@ -1,5 +1,6 @@
 package com.example.bitirmeprojesi.Activities
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
@@ -38,6 +39,17 @@ class SplashScreenActivity : AppCompatActivity() {
 
         rotateAnimation()
 
+        val anim = ValueAnimator.ofInt(0, 300)
+        anim.duration = 2000 // 2 saniye
+        anim.addUpdateListener { valueAnimator ->
+            val value = valueAnimator.animatedValue as Int
+            binding.logo.layoutParams.height = value
+            binding.logo.layoutParams.width = value
+            binding.logo.requestLayout()
+        }
+        anim.start()
+
+
         Handler().postDelayed({
 
             if (firebaseAuth?.currentUser == null) {
@@ -63,7 +75,7 @@ class SplashScreenActivity : AppCompatActivity() {
                 finish()
             }
 
-        }, 1500)
+        }, 2500)
     }
 
     private fun rotateAnimation() {

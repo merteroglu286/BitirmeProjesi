@@ -117,7 +117,7 @@ class UserInfoActivity : AppCompatActivity() {
                     Glide.with(applicationContext).load(userModel!!.image).into(binding.imgProfile)
                     binding.countOfFollowers.text = userModel.followers
                     binding.countOfFollowing.text = userModel.following
-                    binding.countOfNotices.text = userModel.notices
+                    //binding.countOfNotices.text = userModel.notices
                 }
             }
 

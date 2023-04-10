@@ -1,7 +1,6 @@
 package com.example.bitirmeprojesi
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.*
 import com.example.bitirmeprojesi.ViewModels.ProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -30,6 +29,9 @@ class MyApplication : Application(), LifecycleObserver {
         OneSignal.initWithContext(this)
         OneSignal.setAppId(ONESIGNAL_APP_ID)
 
+        onAppForegrounded()
+        onAppBackgrounded()
+        onAppDestroyed()
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)

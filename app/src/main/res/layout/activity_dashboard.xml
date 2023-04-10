@@ -13,7 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/dashboardContainer"
-        tools:context=".Activities.DashboardActivity">
+        tools:context=".Activities.DashboardActivity"
+        >
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewPager"
             android:layout_width="match_parent"

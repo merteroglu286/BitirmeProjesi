@@ -12,27 +12,6 @@
         </deviceKey>
       </Target>
     </targetSelectedWithDropDown>
-    <timeTargetWasSelectedWithDropDown value="2023-03-24T03:26:06.553166500Z" />
-    <multipleDevicesSelectedInDropDown value="true" />
-    <targetsSelectedWithDialog>
-      <Target>
-        <type value="QUICK_BOOT_TARGET" />
-        <deviceKey>
-          <Key>
-            <type value="VIRTUAL_DEVICE_PATH" />
-            <value value="C:\Users\mert_\.android\avd\Pixel_3_API_30.avd" />
-          </Key>
-        </deviceKey>
-      </Target>
-      <Target>
-        <type value="QUICK_BOOT_TARGET" />
-        <deviceKey>
-          <Key>
-            <type value="VIRTUAL_DEVICE_PATH" />
-            <value value="C:\Users\mert_\.android\avd\Pixel_3_API_30_2.avd" />
-          </Key>
-        </deviceKey>
-      </Target>
-    </targetsSelectedWithDialog>
+    <timeTargetWasSelectedWithDropDown value="2023-04-07T00:38:28.212095700Z" />
   </component>
 </project>

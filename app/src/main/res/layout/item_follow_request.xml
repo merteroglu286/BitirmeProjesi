@@ -12,10 +12,7 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginHorizontal="12dp"
-        android:layout_marginTop="6dp"
-        app:cardCornerRadius="12dp">
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -68,6 +65,11 @@
                 />
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="bottom"
+            android:background="@color/lightGray"/>
     </androidx.cardview.widget.CardView>
 
 

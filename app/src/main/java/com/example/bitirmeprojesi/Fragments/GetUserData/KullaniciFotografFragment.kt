@@ -83,7 +83,8 @@ class KullaniciFotografFragment : Fragment() {
                             "kayitliMi" to true,
                             "followers" to "0",
                             "following" to "0",
-                            "notices" to "0"
+                            "notices" to "0",
+                            //"noticeCredit" to "3"
                         )
                         databaseReference!!.child(firebaseAuth!!.uid!!).updateChildren(map)
 

@@ -15,7 +15,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingBottom="24dp"
-        android:background="@drawable/gradient_background">
+        android:background="@drawable/gradient_background"
+        android:paddingTop="20dp">
 
         <ImageView
             android:id="@+id/btnSettings"
@@ -94,7 +95,7 @@
                 android:paddingTop="12dp"
 
                 >
-
+<!--
                 <TextView
                     android:id="@+id/bildiri"
                     android:layout_width="0dp"
@@ -105,7 +106,7 @@
                     android:textAlignment="center"
                     android:textSize="18dp"
                     tools:ignore="RtlCompat" />
-
+-->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
@@ -137,7 +138,7 @@
                 android:orientation="horizontal"
                 android:paddingBottom="12dp"
                 android:layout_below="@id/linearSayilar">
-
+<!--
                 <TextView
                     android:id="@+id/bildiriText"
                     android:layout_width="0dp"
@@ -148,7 +149,7 @@
                     android:textSize="20dp"
                     android:textAlignment="center"
                     tools:ignore="RtlCompat" />
-
+-->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

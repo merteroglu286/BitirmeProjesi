@@ -89,6 +89,7 @@ Numaran hiç kimseyle paylaşılmaz ve profilinde gösterilmez."
         android:layout_height="match_parent"
         android:background="#73A7A7A7"
         android:visibility="invisible">
+
         <ProgressBar
             android:layout_width="100dp"
             android:layout_height="100dp"

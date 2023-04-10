@@ -10,8 +10,10 @@ data class NoticeModel(
     val noticeMessage : String?,
     val noticeImage : String?,
     val noticeDegree : String?,
-    val noticeTime : String?
+    val noticeTime : String?,
+    val noticeRating : String?,
+    val noticeComment : String?,
 ) {
-    constructor() : this("","", "","", "", "", "", "", "","")
+    constructor() : this("","", "","", "", "", "", "", "","","","")
 }
 

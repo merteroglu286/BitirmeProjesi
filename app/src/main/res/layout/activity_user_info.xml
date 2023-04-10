@@ -102,25 +102,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingTop="12dp"
-
-                >
-
-                <TextView
-                    android:id="@+id/countOfNotices"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="left"
-                    android:text="0"
-                    android:textAlignment="center"
-                    android:textSize="18dp"
-                    tools:ignore="RtlCompat" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
+                android:paddingTop="12dp">
                 <TextView
                     android:id="@+id/countOfFollowers"
                     android:layout_width="0dp"
@@ -148,17 +130,6 @@
                 android:orientation="horizontal"
                 android:paddingBottom="12dp"
                 android:layout_below="@id/linearSayilar">
-
-                <TextView
-                    android:id="@+id/bildiriText"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="left"
-                    android:text="Bildiri"
-                    android:textSize="20dp"
-                    android:textAlignment="center"
-                    tools:ignore="RtlCompat" />
 
                 <TextView
                     android:layout_width="wrap_content"

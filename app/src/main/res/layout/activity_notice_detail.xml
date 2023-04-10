@@ -32,14 +32,23 @@
                     android:background="@drawable/border_notice_detail_green"
                     android:orientation="vertical"
                     android:paddingHorizontal="24dp"
-                    android:paddingTop="24dp">
+                    android:paddingBottom="12dp">
 
+                    <TextView
+                        android:id="@+id/tvTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginTop="12dp"
+                        android:text="00:00"
+                        android:textSize="16dp" />
                     <LinearLayout
                         android:id="@+id/linearContext"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:paddingTop="4dp">
+                        android:paddingTop="4dp"
+                        android:layout_below="@id/tvTime">
 
                         <de.hdodenhof.circleimageview.CircleImageView
                             android:id="@+id/imgContactItem"
@@ -102,60 +111,48 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/linearContext"
-                        android:layout_marginTop="12dp"
-                        android:layout_marginStart="64dp"
+                        android:layout_marginTop="16dp"
 
                         >
                         <ImageView
-                            android:id="@+id/btnLike"
+                            android:id="@+id/btnUp"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
-                            android:src="@drawable/hearth_icon"
-                            app:tint="@color/main_red"
-                            android:layout_marginEnd="4dp"
+                            android:src="@drawable/up_arrow_outlined"
+                            app:tint="@color/main_green"
+                            android:layout_gravity="center_vertical"
                             android:foreground="?android:attr/selectableItemBackground"/>
 
                         <TextView
-                            android:id="@+id/numberOfLike"
+                            android:id="@+id/countRating"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="18dp"
-                            android:visibility="gone"
-                            android:layout_marginBottom="2dp"
-                            android:layout_marginEnd="12dp"
-                            android:layout_gravity="center"/>
+                            android:layout_height="match_parent"
+                            android:text="@{noticeModel.noticeRating , default=0}"
+                            android:textSize="14dp"
+                            android:visibility="visible"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="2dp" />
+                        <ImageView
+                            android:id="@+id/btnDown"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/down_arrow_outlined"
+                            app:tint="@color/main_green"
+                            android:layout_marginEnd="4dp"
+                            android:layout_gravity="center_vertical"
+                            android:foreground="?android:attr/selectableItemBackground"/>
                         <ImageView
                             android:id="@+id/btnComment"
                             android:layout_width="21dp"
                             android:layout_height="24dp"
                             android:src="@drawable/chat_icon"
-                            app:tint="@color/main_red"
+                            app:tint="@color/main_green"
                             android:layout_marginEnd="4dp"
                             android:foreground="?android:attr/selectableItemBackground"/>
 
-                        <TextView
-                            android:id="@+id/numberOfComment"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="18dp"
-                            android:visibility="gone"
-                            android:layout_marginBottom="2dp"
-                            android:layout_marginEnd="12dp"
-                            android:layout_gravity="center"/>
 
                     </LinearLayout>
-                    <TextView
-                        android:id="@+id/tvTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/linearContext"
-                        android:layout_alignParentEnd="true"
-                        android:layout_marginVertical="12dp"
-                        android:layout_marginEnd="4dp"
-                        android:text="00:00"
-                        android:textSize="16dp" />
+
                 </RelativeLayout>
 
 

@@ -63,8 +63,6 @@ class ChatFragment : Fragment() {
         sharedPreferences = requireContext()!!.getSharedPreferences("Conversations", Context.MODE_PRIVATE)
 
 
-
-
         profileViewModels = ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity()!!.application).create(
             ProfileViewModel::class.java)
 

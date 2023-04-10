@@ -52,7 +52,7 @@ class FollowRequestsAdapter(val requestList: MutableList<FollowRequestModel>, co
         val requests = requestList[position]
         holder.view.requestModel = requests
 
-        holder.view.imgContactItem.setOnClickListener{
+        holder.itemView.setOnClickListener{
             val intent = Intent(it.context, UserInfoActivity::class.java)
             intent.putExtra("hisId",requests.senderId)
             intent.putExtra("hisImage",requests.senderImage)

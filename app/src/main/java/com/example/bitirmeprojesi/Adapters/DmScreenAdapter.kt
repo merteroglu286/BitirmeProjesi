@@ -7,14 +7,18 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
+import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.bitirmeprojesi.ConversationsModel
 import com.example.bitirmeprojesi.MessagingActivity
+import com.example.bitirmeprojesi.R
+import com.example.bitirmeprojesi.UserModel
 import com.example.bitirmeprojesi.ViewModels.ProfileViewModel
 import com.example.bitirmeprojesi.databinding.DeleteItemDialogBinding
 import com.example.bitirmeprojesi.databinding.DmScreenRowBinding
@@ -105,6 +109,67 @@ class DmScreenAdapter(
             }
         }
 
+        holder.itemView.btn_popup_dm.setOnClickListener {
+
+            val popupMenu = PopupMenu(context,holder.itemView.btn_popup_dm, Gravity.TOP)
+
+            popupMenu.menuInflater.inflate(R.menu.menu_follow_adapter,popupMenu.menu)
+            val menuItem = popupMenu.menu.findItem(R.id.item)
+            menuItem.title = "Sohbeti sil"
+            popupMenu.setOnMenuItemClickListener {menuItem->
+                val id = menuItem.itemId
+
+                if (id == R.id.item){
+                    val alertDialog = AlertDialog.Builder(it.context)
+                    val inflater =
+                        context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+                    deleteItemDialogBinding = DeleteItemDialogBinding.inflate(inflater)
+                    alertDialog.setView(deleteItemDialogBinding.root)
+
+                    deleteItemDialogBinding.btnYes.setOnClickListener {
+                        val ref = FirebaseDatabase.getInstance().getReference("Conversations").child(
+                            FirebaseAuth.getInstance().currentUser!!.uid.toString()).child(conversationModel.receiverId.toString())
+
+                        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                for (refSnapshot in dataSnapshot.children) {
+                                    refSnapshot.ref.removeValue()
+                                }
+                            }
+                            override fun onCancelled(databaseError: DatabaseError) {
+                                Log.e(ContentValues.TAG, "onCancelled", databaseError.toException())
+                            }
+                        })
+
+                        val ref2 = FirebaseDatabase.getInstance().getReference("Chat").child(FirebaseAuth.getInstance().currentUser!!.uid.toString()).child(conversationModel.receiverId.toString())
+
+                        ref2.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                for (refSnapshot in dataSnapshot.children) {
+                                    refSnapshot.ref.removeValue()
+                                }
+                            }
+                            override fun onCancelled(databaseError: DatabaseError) {
+                                Log.e(ContentValues.TAG, "onCancelled", databaseError.toException())
+                            }
+                        })
+
+
+                        dialog.dismiss()
+                    }
+                    deleteItemDialogBinding.btnNo.setOnClickListener {
+                        dialog.dismiss()
+                    }
+
+                    dialog = alertDialog.create()
+                    dialog.show()
+                }
+
+                false
+            }
+            popupMenu.show()
+        }
+
         holder.itemView.setOnClickListener {
             val intent = Intent(it.context,MessagingActivity::class.java)
             intent.putExtra("hisId",conversationModel.receiverId)
@@ -119,54 +184,6 @@ class DmScreenAdapter(
 
             it.context.startActivity(intent)
 
-        }
-
-        holder.itemView.setOnLongClickListener {
-
-            val alertDialog = AlertDialog.Builder(it.context)
-            val inflater =
-                context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-            deleteItemDialogBinding = DeleteItemDialogBinding.inflate(inflater)
-            alertDialog.setView(deleteItemDialogBinding.root)
-
-            deleteItemDialogBinding.btnYes.setOnClickListener {
-                val ref = FirebaseDatabase.getInstance().getReference("Conversations").child(
-                    FirebaseAuth.getInstance().currentUser!!.uid.toString()).child(conversationModel.receiverId.toString())
-
-                ref.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        for (refSnapshot in dataSnapshot.children) {
-                            refSnapshot.ref.removeValue()
-                        }
-                    }
-                    override fun onCancelled(databaseError: DatabaseError) {
-                        Log.e(ContentValues.TAG, "onCancelled", databaseError.toException())
-                    }
-                })
-
-                val ref2 = FirebaseDatabase.getInstance().getReference("Chat").child(FirebaseAuth.getInstance().currentUser!!.uid.toString()).child(conversationModel.receiverId.toString())
-
-                ref2.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        for (refSnapshot in dataSnapshot.children) {
-                            refSnapshot.ref.removeValue()
-                        }
-                    }
-                    override fun onCancelled(databaseError: DatabaseError) {
-                        Log.e(ContentValues.TAG, "onCancelled", databaseError.toException())
-                    }
-                })
-
-
-                dialog.dismiss()
-            }
-            deleteItemDialogBinding.btnNo.setOnClickListener {
-                dialog.dismiss()
-            }
-
-            dialog = alertDialog.create()
-            dialog.show()
-            true
         }
 
 

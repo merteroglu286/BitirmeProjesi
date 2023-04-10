@@ -9,11 +9,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.Drawable
-import android.location.Geocoder
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
+import android.graphics.PorterDuff
+import android.location.*
 import android.net.Uri
 import androidx.fragment.app.Fragment
 
@@ -35,12 +32,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.CustomTarget
-import com.example.bitirmeprojesi.Activities.NoticesActivity
-import com.example.bitirmeprojesi.Activities.UserInfoActivity
+import com.example.bitirmeprojesi.Activities.AllNoticesActivity
+import com.example.bitirmeprojesi.Activities.NearbyNoticesActivity
 import com.example.bitirmeprojesi.Constants.AppConstants
 import com.example.bitirmeprojesi.R
 import com.example.bitirmeprojesi.UserModel
@@ -63,12 +56,9 @@ import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import kotlinx.android.synthetic.main.bildiri_dialog.*
 import kotlin.math.roundToInt
-import com.bumptech.glide.request.target.Target
-import com.bumptech.glide.request.transition.Transition
 import com.example.bitirmeprojesi.Activities.NoticeDetailActivity
-import com.example.bitirmeprojesi.InfoWindowRefresher
 import com.example.bitirmeprojesi.NoticeModel
-import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.activity_notices.*
 import kotlinx.android.synthetic.main.custom_infoview.*
 import kotlinx.android.synthetic.main.custom_infoview.view.*
 import java.text.SimpleDateFormat
@@ -95,11 +85,11 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
     private  var noticeImageUri: Uri? = null
     private lateinit var noticeImageUrl:String
 
-    private var storageReference: StorageReference? = null
-    private var databaseReference: DatabaseReference? = null
+    private var centerLat:Double = 0.0
+    private var centerLong:Double = 0.0
 
+    private var storageReference: StorageReference? = null
     private var noticeDegree : String = "green"
-    //private var zoomLevel = 0f
     private var markerSize = 100
 
     val noticesList = ArrayList<NoticeModel>()
@@ -108,16 +98,8 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
     private val markers = mutableListOf<Marker>()
     var markerSet: Hashtable<String, Boolean> = Hashtable<String, Boolean>()
 
-
-    private lateinit var infoWindowUserName : String
-    private lateinit var infoWindowUserImage : String
-    private lateinit var infoWindowUserNoticeID : String
-    private lateinit var infoWindowUserNoticeMsg : String
-    private lateinit var infoWindowUserNoticeImage : String
-
-    //val RADIUS_METERS = 1000
-    //val DENSITY_THRESHOLD = 5
-
+    private var konumBulunduMu : Boolean = false
+    private var noticeCredit = 1
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val fab = activity?.findViewById<FloatingActionButton>(R.id.bottomBarFabMap)
@@ -135,11 +117,13 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+
+        userLiveData()
+
+
         mapFragment?.getMapAsync {
                 googleMap -> mMap = googleMap
                 onMapReady(googleMap)
-
-
 
             storageReference = FirebaseStorage.getInstance().reference
             blackListViewModel = ViewModelProviders.of(this@MapsFragment).get(BlackListViewModel::class.java)
@@ -167,29 +151,6 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                 }
 
                 override fun onQueryTextChange(newText: String?): Boolean {
-                    /*  // Arama metni değiştirildiğinde yapılacak işlemler burada yazılır
-                   if (!newText.isNullOrEmpty()) {
-                       // Arama metni boş değilse, arama sonuçlarını gösterin
-                       val searchResults = mutableListOf<String>()
-                       for (address in addressList) {
-                           if (address.getAddressLine(0).contains(newText, ignoreCase = true)) {
-                               searchResults.add(address.getAddressLine(0))
-                           }
-                       }
-                       showSearchResults(searchResults)
-                   } else {
-                       // Arama metni boş veya null ise, tüm arama sonuçlarını gösterin
-                       val searchResults = mutableListOf<String>()
-                       for (address in addressList) {
-                           searchResults.add(address.getAddressLine(0))
-                       }
-                       showSearchResults(searchResults)
-                   }
-
-
-                   return true
-
-                  */
                     return false
                 }
             })
@@ -198,10 +159,15 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
 
 
         binding.btnToNoticesFragment.setOnClickListener {
-            val intent = Intent(context, NoticesActivity::class.java)
+            val intent = Intent(context, NearbyNoticesActivity::class.java)
+            intent.putExtra("centerLat", centerLat)
+            intent.putExtra("centerLong", centerLong)
             startActivity(intent)
         }
-
+        binding.btnToAllNoticesFragment.setOnClickListener {
+            val intent = Intent(context, AllNoticesActivity::class.java)
+            startActivity(intent)
+        }
     }
 
 
@@ -221,7 +187,6 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
             Log.e("TagMaps","Duzgun yuklendi")
         }
 
-        userLiveData()
         noticeViewModel = ViewModelProviders.of(this@MapsFragment).get(NoticeViewModel::class.java)
         noticeViewModel.getDataFromFirebase()
 
@@ -246,6 +211,13 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
             }
         })
 
+        binding.fabShowSearcbar.setOnClickListener{
+            if (binding.mapSearchView.visibility == View.GONE){
+                binding.mapSearchView.visibility = View.VISIBLE
+            }else{
+                binding.mapSearchView.visibility = View.GONE
+            }
+        }
 
 
         locationManager = activity?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -254,24 +226,13 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
             override fun onLocationChanged(konum: Location) {
                 // lokasyon,konum degisince yapilacak islemer
 
-
-
-
                 guncelKonum = LatLng(konum.latitude,konum.longitude)
 
-                /*
-// Yoğunluğu göstermek için dairesel bir şekil çizin
-                val densityCircle = CircleOptions()
-                    .center(guncelKonum)
-                    .radius(500.0) // Örneğin, yarıçap 500 metre olsun
-                    .strokeColor(Color.TRANSPARENT)
-                    .fillColor(Color.argb(128, 255, 0, 0))
+                centerLat = konum.latitude
+                centerLong = konum.longitude
 
-// Haritaya dairesel şekli ekleyin
 
-                mMap.addCircle(densityCircle)
 
-                 */
                 binding.fabAddLocation.setOnClickListener{
 
                     Toast.makeText(context,"tıklandı",Toast.LENGTH_SHORT).show()
@@ -338,19 +299,6 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                             dialogBinding.messageEdittext.background = resources.getDrawable(R.drawable.edittext_alert_border)
                             dialogBinding.alertTxt.visibility = View.VISIBLE
                         }else{
-                            /*
-                            val words = dialogBinding.messageEdittext.text.split(" ")
-                            if (words.any { word -> blackList.contains(word) }){
-                                dialogBinding.alertTxt.text = "Mesajınız uygunsuz ifadeler içermektedir."
-                                dialogBinding.messageEdittext.background = resources.getDrawable(R.drawable.edittext_alert_border)
-                                dialogBinding.alertTxt.visibility = View.VISIBLE
-                            }else{
-
-                                dialogBinding.alertTxt.text = "Lütfen bir mesaj giriniz."
-
-                            }
-
-                             */
 
                             val timestamp = System.currentTimeMillis().toString()
 
@@ -371,8 +319,9 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                                                 "noticeDegree" to noticeDegree,
                                                 "noticeTime" to timestamp,
                                                 "noticeImage" to noticeImageUrl,
+                                                "noticeRating" to "0"
                                             )
-                                            FirebaseDatabase.getInstance().getReference("Notices").push().setValue(map)
+                                            FirebaseDatabase.getInstance().getReference("Notices").child(userID+timestamp).setValue(map)
                                         }
                                     }
                             }else{
@@ -385,10 +334,11 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                                     "noticeMessage" to dialogBinding.messageEdittext.text.toString(),
                                     "userImage" to userImage,
                                     "noticeDegree" to noticeDegree,
-                                    "noticeTime" to timestamp
+                                    "noticeTime" to timestamp,
+                                    "noticeRating" to "0"
                                 )
 
-                                FirebaseDatabase.getInstance().getReference("Notices").push().setValue(map)
+                                FirebaseDatabase.getInstance().getReference("Notices").child(userID+timestamp).setValue(map)
                             }
 
                             var referenceUsers =
@@ -403,10 +353,13 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                                         val userModel = snapshot.getValue(UserModel::class.java)
                                         if (userModel != null) {
                                             var noticesCount = (userModel.notices.toInt() + 1).toString()
+                                            var noticeCredit = (userModel.noticeCredit) - 1
                                             val map = mapOf(
-                                                "notices" to noticesCount
+                                                "notices" to noticesCount,
+                                                "noticeCredit" to noticeCredit
                                             )
                                             referenceUsers.child(userID).updateChildren(map)
+
                                         }
                                         //Picasso.get().load(userModel!!.image).into(activityMessageBinding.imgProfile)
                                     }
@@ -418,68 +371,25 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                             })
 
 
+
                             dialog.dismiss()
 
                         }
                     }
                 }
 
+                if (konumBulunduMu == false){
+                    var baslangicKonum = mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(guncelKonum,15f))
 
-
-
-
-
-/*
-                binding.fabAddLocation.setOnClickListener {
-
-                    val map = mapOf(
-                        "latitude" to konum.latitude.toString(),
-                        "longitude" to konum.longitude.toString(),
-                        "uid" to FirebaseAuth.getInstance().uid!!.toString(),
-                    )
-                    FirebaseDatabase.getInstance().getReference("Location")!!.child(FirebaseAuth.getInstance().uid!!.toString(),).updateChildren(map)
-                    //timeLocation.start()
-                }
-
-
- */
-
-                var baslangicKonum = mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(guncelKonum,15f))
-
-                baslangicKonum.apply {
-                    baslangicKonum = mMap.moveCamera(CameraUpdateFactory.zoomTo(15f))
-                }
-
-
-
-
-/*
-                if (markers.size >= DENSITY_THRESHOLD) {
-                    // Markerların ortalama konumu alınır
-                    val latLngBounds = LatLngBounds.builder()
-                    for (marker in markers) {
-                        latLngBounds.include(marker.position)
+                    baslangicKonum.apply {
+                        baslangicKonum = mMap.moveCamera(CameraUpdateFactory.zoomTo(15f))
                     }
-                    val center = latLngBounds.build().center
-
-                    // Daire oluşturulur
-                    val circleOptions = CircleOptions()
-                        .center(center)
-                        .radius(RADIUS_METERS.toDouble())
-                        .fillColor(Color.TRANSPARENT)
-                        .fillColor(Color.argb(128, 255, 0, 0))
-
-                    val densityCircle = CircleOptions()
-                        .center(guncelKonum)
-                        .radius(500.0) // Örneğin, yarıçap 500 metre olsun
-                        .strokeColor(Color.TRANSPARENT)
-                        .fillColor(Color.argb(128, 255, 0, 0))
-
-                    // Haritaya daire eklenir
-                    mMap.addCircle(circleOptions)
+                    konumBulunduMu = true
                 }
 
- */
+                binding.fabShowLocation.setOnClickListener {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(guncelKonum,15f))
+                }
 
                 mMap.setOnMarkerClickListener(this@MapsFragment)
 
@@ -501,30 +411,27 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
 
         }
 
-
-
-
-
         // set listeners for camera movements
         mMap.setOnCameraIdleListener(this)
 
-        mMap.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
-            override fun getInfoWindow(marker: Marker): View? {
-                return null
+        mMap.setInfoWindowAdapter(object :GoogleMap.InfoWindowAdapter{
+            override fun getInfoContents(marker: Marker): View {
+                TODO("Not yet implemented")
             }
 
+            override fun getInfoWindow(marker: Marker): View {
+                val view: View = layoutInflater.inflate(
+                    R.layout.custom_infoview,
+                    requireView().findViewById(R.id.map),
+                    false
+                )
 
-            @SuppressLint("CheckResult")
-            override fun getInfoContents(marker: Marker): View {
-
-                val view = layoutInflater.inflate(R.layout.custom_infoview, null)
-
-                val imgInfo = view.findViewById<ImageView>(R.id.infoImageView)
-                val noticeImgInfo = view.findViewById<ImageView>(R.id.noticeImageInfoView)
+                val imgInfo = view!!.findViewById<ImageView>(R.id.infoImageView)
                 for (notice in noticesList) {
                     if (marker.snippet == notice.noticeID) {
                         view.infoName.text = notice.username
                         view.txtİnfoView.text = notice.noticeMessage
+                        view.countRating.text = notice.noticeRating
 
 
                         var currentTime = System.currentTimeMillis()
@@ -532,21 +439,14 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                         val simpleDateFormat = SimpleDateFormat("kk:mm", Locale.getDefault())
                         val simpleDateFormat2 = SimpleDateFormat("kk:mm dd.MM.yyyy", Locale.getDefault())
 
-
-                        val minute = SimpleDateFormat("mm", Locale.getDefault())
-                        val hours = SimpleDateFormat("kk", Locale.getDefault())
                         val day = SimpleDateFormat("dd", Locale.getDefault())
                         val month = SimpleDateFormat("MM", Locale.getDefault())
                         val year = SimpleDateFormat("yyyy", Locale.getDefault())
 
-                        val sharedNoticeMinute = minute.format(notice.noticeTime?.toLong())
-                        val sharedNoticeHours = hours.format(notice.noticeTime?.toLong())
                         val sharedNoticeDay = day.format(notice.noticeTime?.toLong())
                         val sharedNoticeMonth = month.format(notice.noticeTime?.toLong())
                         val sharedNoticeYear = year.format(notice.noticeTime?.toLong())
 
-                        val currentMinute = minute.format(currentTime)
-                        val currentHours = hours.format(currentTime)
                         val currentDay = day.format(currentTime)
                         val currentMonth = month.format(currentTime)
                         val currentYear = year.format(currentTime)
@@ -563,15 +463,7 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                         val diffMinutes = diffMillis / (1000 * 60)
                         var zaman = currentTime - notice.noticeTime!!.toLong()
 
-                        if (zaman < 60_000
-                        /*
-                    if (now.get(Calendar.YEAR) == noticeTime.get(Calendar.YEAR) &&
-                        now.get(Calendar.DAY_OF_YEAR) == noticeTime.get(Calendar.DAY_OF_YEAR) &&
-                        now.get(Calendar.HOUR_OF_DAY) == noticeTime.get(Calendar.HOUR_OF_DAY) &&
-                        now.get(Calendar.MINUTE) == noticeTime.get(Calendar.MINUTE)
-
-                         */
-                        ) {
+                        if (zaman < 60_000) {
                             view.infoTime.text = "Şimdi"
                         }
                         else {
@@ -587,19 +479,19 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                             }
                         }
 
-                        Glide.with(requireContext()).load(notice.userImage).into(imgInfo)
-                        /*
-                        if (notice.noticeImage == ""){
-                            noticeImgInfo.visibility = View.GONE
-                        }else{
-                            Glide.with(requireContext()).load(notice.noticeImage).into(noticeImgInfo)
-                            noticeImgInfo.visibility = View.VISIBLE
+                        if (notice.noticeDegree == "green"){
+                            view.linearContext.background = this@MapsFragment.resources.getDrawable(R.drawable.border_notice_detail_green)
+                            view.countRating.setTextColor(ContextCompat.getColor(requireContext(), R.color.main_green))
                         }
-
-                         */
-
-                        //Picasso.get().load(notice.userImage).into(imgInfo,InfoWindowRefresher(marker,notice.userImage!!,imgInfo,requireContext()))
-
+                        if (notice.noticeDegree == "yellow"){
+                            view.linearContext.background = this@MapsFragment.resources.getDrawable(R.drawable.border_notice_detail_yellow)
+                            view.countRating.setTextColor(ContextCompat.getColor(requireContext(), R.color.mainYellow))
+                        }
+                        if (notice.noticeDegree == "red"){
+                            view.linearContext.background = this@MapsFragment.resources.getDrawable(R.drawable.border_notice_detail_red)
+                            view.countRating.setTextColor(ContextCompat.getColor(requireContext(), R.color.main_red))
+                        }
+                        Glide.with(requireContext()).load(notice.userImage).into(imgInfo)
                     }
                 }
 
@@ -607,8 +499,6 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
             }
 
         })
-
-
 
         if (ContextCompat.checkSelfPermission(requireContext(),Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
@@ -642,164 +532,84 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
             17 -> 95
             else -> 100
         }
-/*
-        binding.sayac.text = when (zoom) {
-            1 -> "1"
-            2 -> "2"
-            3 -> "3"
-            4 -> "4"
-            5 -> "5"
-            6 -> "6"
-            7 -> "7"
-            8 -> "8"
-            9 -> "9"
-            10 -> "10"
-            11 -> "11"
-            12 -> "12"
-            13 -> "13"
-            14 -> "14"
-            15 -> "15"
-            16 -> "16"
-            17 -> "17"
-            else -> "0"
-        }
-
- */
     }
 
-/*
-    fun countMarkersNearby(center: LatLng, radius: Double, markers: List<Marker>): Int {
-        var count = 0
-        for (marker in markers) {
-            val markerLocation = Location("markerLocation")
-            markerLocation.latitude = marker.position.latitude
-            markerLocation.longitude = marker.position.longitude
-
-            val centerLocation = Location("centerLocation")
-            centerLocation.latitude = center.latitude
-            centerLocation.longitude = center.longitude
-
-            val distance = markerLocation.distanceTo(centerLocation)
-            if (distance <= radius) {
-                count++
-            }
-        }
-        return count
-    }
-
-
- */
 
     fun locationLiveData(mMap : GoogleMap){
         noticeViewModel.noticesLiveData.observe(viewLifecycleOwner, Observer { notices ->
             notices?.let{
                 if (notices.isNotEmpty()){
                     for (notice in notices){
-                        var markerBitmap: Bitmap
-                        // var color = BitmapDescriptorFactory.HUE_GREEN
-                        if (notice.noticeDegree == "green"){
-                           // color = BitmapDescriptorFactory.HUE_GREEN
-                            markerBitmap = BitmapFactory.decodeResource(resources, R.drawable.marker_green)
-                            val resizedMarkerBitmap = Bitmap.createScaledBitmap(markerBitmap, markerSize, markerSize, false)
-                            val markerOptions = MarkerOptions()
-                                .position(LatLng(ParseDouble(notice.latitude),ParseDouble(notice.longitude)))
-                                .title(notice.userID)
-                                .icon(BitmapDescriptorFactory.fromBitmap(resizedMarkerBitmap))
-                                .snippet(notice.noticeID)
-                            val marker = mMap.addMarker(markerOptions)
 
-                            marker?.tag = "green"
-                            markerSet[marker?.id.toString()] = false
+                        val databaseReference = FirebaseDatabase.getInstance().getReference("Notices").child(notice.noticeID.toString())
 
-                            marker?.let { it1 -> markers.add(it1) }
-                        }
-                        if (notice.noticeDegree == "yellow"){
-                           // color = BitmapDescriptorFactory.HUE_YELLOW
-                            markerBitmap = BitmapFactory.decodeResource(resources, R.drawable.marker_yellow)
-                            val resizedMarkerBitmap = Bitmap.createScaledBitmap(markerBitmap, markerSize, markerSize, false)
-                            val markerOptions = MarkerOptions()
-                                .position(LatLng(ParseDouble(notice.latitude),ParseDouble(notice.longitude)))
-                                .title(notice.userID)
-                                .icon(BitmapDescriptorFactory.fromBitmap(resizedMarkerBitmap))
-                                .snippet(notice.noticeID)
-                            val marker = mMap.addMarker(markerOptions)
+                        val currentMillis = System.currentTimeMillis()
+                        val noticeMillis = notice.noticeTime?.toLongOrNull() ?: 0L
 
-                            marker?.tag = "yellow"
-                            markerSet[marker?.id.toString()] = false
-                            marker?.let { it1 -> markers.add(it1) }
-                        }
-                        if (notice.noticeDegree == "red"){
-                           // color = BitmapDescriptorFactory.HUE_RED
-                            markerBitmap = BitmapFactory.decodeResource(resources, R.drawable.marker_red)
-                            val resizedMarkerBitmap = Bitmap.createScaledBitmap(markerBitmap, markerSize, markerSize, false)
-                            val markerOptions = MarkerOptions()
-                                .position(LatLng(ParseDouble(notice.latitude),ParseDouble(notice.longitude)))
-                                .title(notice.userID)
-                                .icon(BitmapDescriptorFactory.fromBitmap(resizedMarkerBitmap))
-                                .snippet(notice.noticeID)
-                            val marker = mMap.addMarker(markerOptions)
-
-                            marker?.tag = "red"
-                            markerSet[marker?.id.toString()] = false
-
-                            marker?.let { it1 -> markers.add(it1) }
-
-
-                        }
-
-
-                        //updateCounter(mMap.cameraPosition.zoom.roundToInt())
-
-                    }
-
-                }
-                //Toast.makeText(requireContext(),markers.size .toString(),Toast.LENGTH_SHORT).show()
-
-/*
-                val radius: Double = 100.0 // Belirleyeceğiniz daire yarıçapı
-
-                val limit: Int = 5 // Belirleyeceğiniz marker sınırı
-
-                for (marker in markers) {
-                    var count = 0
-                    for (otherMarker in markers) {
-                        if (marker != otherMarker) {
-                            val distance = calculateDistance(marker.position, otherMarker.position)
-                            if (distance < radius) {
-                                count++
-                            }
-                        }
-                    }
-                    if (count > limit) {
-                        val circleOptions = CircleOptions()
-                            .center(marker.position)
-                            .radius(radius)
-                            .strokeWidth(2f)
-                            .strokeColor(Color.BLUE)
-                            .fillColor(Color.argb(50, 0, 0, 255))
-                        val circle = mMap.addCircle(circleOptions)
-                        val markersInCircle = mutableListOf<Marker>()
-                        for (otherMarker in markers) {
-                            if (otherMarker != marker) {
-                                val distance = calculateDistance(marker.position, otherMarker.position)
-                                if (distance < radius) {
-                                    markersInCircle.add(otherMarker)
+                        if ((currentMillis - noticeMillis) > (24 * 60 * 60 * 1000)) { // 24 saatlik süre milisaniye cinsinden hesaplanır
+                            databaseReference.removeValue()
+                            for (marker in markers) {
+                                if (marker.snippet == notice.noticeID) {
+                                    marker.remove()
                                 }
                             }
+                        }else{
+                            var markerBitmap: Bitmap
+                            // var color = BitmapDescriptorFactory.HUE_GREEN
+                            if (notice.noticeDegree == "green"){
+                                // color = BitmapDescriptorFactory.HUE_GREEN
+                                markerBitmap = BitmapFactory.decodeResource(resources, R.drawable.marker_green)
+                                val resizedMarkerBitmap = Bitmap.createScaledBitmap(markerBitmap, markerSize, markerSize, false)
+                                val markerOptions = MarkerOptions()
+                                    .position(LatLng(ParseDouble(notice.latitude),ParseDouble(notice.longitude)))
+                                    .title(notice.userID)
+                                    .icon(BitmapDescriptorFactory.fromBitmap(resizedMarkerBitmap))
+                                    .snippet(notice.noticeID)
+                                val marker = mMap.addMarker(markerOptions)
+
+                                marker?.tag = "green"
+                                markerSet[marker?.id.toString()] = false
+
+                                marker?.let { it1 -> markers.add(it1) }
+                            }
+                            if (notice.noticeDegree == "yellow"){
+                                // color = BitmapDescriptorFactory.HUE_YELLOW
+                                markerBitmap = BitmapFactory.decodeResource(resources, R.drawable.marker_yellow)
+                                val resizedMarkerBitmap = Bitmap.createScaledBitmap(markerBitmap, markerSize, markerSize, false)
+                                val markerOptions = MarkerOptions()
+                                    .position(LatLng(ParseDouble(notice.latitude),ParseDouble(notice.longitude)))
+                                    .title(notice.userID)
+                                    .icon(BitmapDescriptorFactory.fromBitmap(resizedMarkerBitmap))
+                                    .snippet(notice.noticeID)
+                                val marker = mMap.addMarker(markerOptions)
+
+                                marker?.tag = "yellow"
+                                markerSet[marker?.id.toString()] = false
+                                marker?.let { it1 -> markers.add(it1) }
+                            }
+                            if (notice.noticeDegree == "red"){
+                                // color = BitmapDescriptorFactory.HUE_RED
+                                markerBitmap = BitmapFactory.decodeResource(resources, R.drawable.marker_red)
+                                val resizedMarkerBitmap = Bitmap.createScaledBitmap(markerBitmap, markerSize, markerSize, false)
+                                val markerOptions = MarkerOptions()
+                                    .position(LatLng(ParseDouble(notice.latitude),ParseDouble(notice.longitude)))
+                                    .title(notice.userID)
+                                    .icon(BitmapDescriptorFactory.fromBitmap(resizedMarkerBitmap))
+                                    .snippet(notice.noticeID)
+                                val marker = mMap.addMarker(markerOptions)
+
+                                marker?.tag = "red"
+                                markerSet[marker?.id.toString()] = false
+
+                                marker?.let { it1 -> markers.add(it1) }
+
+
+                            }
                         }
-                        val centroid = calculateCentroid(markersInCircle)
-                        val offset = calculateOffset(marker.position, centroid)
-                        for (markerInCircle in markersInCircle) {
-                            val newPosition = LatLng(markerInCircle.position.latitude + offset.latitude,
-                                markerInCircle.position.longitude + offset.longitude)
-                            markerInCircle.position = newPosition
-                        }
+
                     }
+
                 }
-
-
-
- */
 
             }
 
@@ -813,58 +623,8 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                     Toast.makeText(context,"hata çıktı",Toast.LENGTH_SHORT).show()
                 }
             }
-
         })
-
-
-
     }
-
-    fun calculateDistance(position1: LatLng, position2: LatLng): Double {
-        val lat1 = position1.latitude
-        val lng1 = position1.longitude
-        val lat2 = position2.latitude
-        val lng2 = position2.longitude
-        val earthRadius = 6371000.0 //
-
-        val dLat = Math.toRadians(lat2 - lat1)
-        val dLng = Math.toRadians(lng2 - lng1)
-        val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-                Math.sin(dLng / 2) * Math.sin(dLng / 2)
-        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-        return earthRadius * c
-    }
-
-    fun calculateCentroid(markers: List<Marker>): LatLng {
-        var latSum = 0.0
-        var lngSum = 0.0
-        for (marker in markers) {
-            latSum += marker.position.latitude
-            lngSum += marker.position.longitude
-        }
-        val lat = latSum / markers.size
-        val lng = lngSum / markers.size
-        return LatLng(lat, lng)
-    }
-
-    fun calculateOffset(position1: LatLng, position2: LatLng): LatLng {
-        val lat1 = position1.latitude
-        val lng1 = position1.longitude
-        val lat2 = position2.latitude
-        val lng2 = position2.longitude
-        val dLat = Math.toRadians(lat2 - lat1)
-        val dLng = Math.toRadians(lng2 - lng1)
-        val distance = calculateDistance(position1, position2)
-        val bearing = Math.atan2(Math.sin(dLng) * Math.cos(Math.toRadians(lat2)),
-            Math.cos(Math.toRadians(lat1)) * Math.sin(Math.toRadians(lat2)) -
-                    Math.sin(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-                    Math.cos(dLng))
-        val latOffset = distance * Math.cos(bearing)
-        val lngOffset = distance * Math.sin(bearing)
-        return LatLng(latOffset, lngOffset)
-    }
-
 
     fun userLiveData(){
         profileViewModels = ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity()!!.application).create(
@@ -874,6 +634,16 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
             username = userModel.username
             userImage = userModel.image
             userID = userModel.uid
+            noticeCredit = userModel.noticeCredit
+            binding.noticeCredit.text = "${userModel.noticeCredit}/3"
+
+            if (noticeCredit == 0){
+                binding.fabAddLocation.visibility = View.INVISIBLE
+                binding.fabAddLocationPale.visibility = View.VISIBLE
+            }else{
+                binding.fabAddLocationPale.visibility = View.INVISIBLE
+                binding.fabAddLocation.visibility = View.VISIBLE
+            }
         })
     }
 
@@ -899,7 +669,7 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
         mymarker.showInfoWindow()
 
 
-        val delayMillis = 2000L // 3 saniye
+        val delayMillis = 1000L // 3 saniye
         val runnable = Runnable {
             mymarker.hideInfoWindow()
             mymarker.showInfoWindow()
@@ -1013,4 +783,11 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
 
         }
     }
+    fun checkIfFragmentAttached(operation: Context.() -> Unit) {
+        if (isAdded && context != null) {
+            operation(requireContext())
+        }
+    }
+
+
 }

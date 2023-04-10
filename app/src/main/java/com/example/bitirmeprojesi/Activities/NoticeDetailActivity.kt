@@ -41,9 +41,6 @@ class NoticeDetailActivity : AppCompatActivity() {
     private lateinit var userID: String
     private lateinit var userName: String
     private lateinit var userImage: String
-    val commentLiveData = MutableLiveData<List<NoticeCommentModel>>()
-    //var commentList = ArrayList<NoticeCommentModel>()
-    val commentList = mutableListOf<NoticeCommentModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,7 +94,6 @@ class NoticeDetailActivity : AppCompatActivity() {
                     "comment" to comment,
                     "commentTime" to now.toString()
                 )
-                NoticeCommentModel()
                 databaseReference!!.child(noticeID.toString()).push().setValue(map)
             }
 
@@ -119,11 +115,341 @@ class NoticeDetailActivity : AppCompatActivity() {
         getNoticeFromFirebase(noticeID.toString())
 
 
+        val databaseReferenceRating = FirebaseDatabase.getInstance().getReference("NoticeRatings")
+        val noticeIDReference = databaseReferenceRating.child(noticeID.toString()).child(userID)
+
+        noticeIDReference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()){
+                    val noticeRating = snapshot.getValue(NoticeRatings::class.java)
+                    if (noticeRating != null) {
+                        if (noticeRating.ratingUp == true){
+                            binding.btnUp.setImageResource(R.drawable.up_arrow_filled)
+                            binding.btnDown.setImageResource(R.drawable.down_arrow_outlined)
+                        }
+                        if (noticeRating.ratingDown == true){
+                            binding.btnUp.setImageResource(R.drawable.up_arrow_outlined)
+                            binding.btnDown.setImageResource(R.drawable.down_arrow_filled)
+                        }
+
+                        if (noticeRating.ratingUp == false && noticeRating.ratingDown == false){
+
+                            binding.btnUp.setOnClickListener {
+
+                                binding.btnUp.setImageResource(R.drawable.up_arrow_filled)
+                                binding.btnDown.setImageResource(R.drawable.down_arrow_outlined)
+
+                                val databaseReference = FirebaseDatabase.getInstance().getReference("NoticeRatings")
+                                val map = mapOf(
+                                    "noticeID" to noticeID,
+                                    "userID" to userID,
+                                    "ratingUp" to true,
+                                    "ratingDown" to false,
+                                )
+                                databaseReference.child(noticeID.toString()).child(userID).setValue(map)
+
+                                val ref = FirebaseDatabase.getInstance().getReference("Notices").child(noticeID.toString())
+
+                                ref.addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        val noticeModel = snapshot.getValue(NoticeModel::class.java)
+                                        noticeModel?.let {
+                                            val newCount = (noticeModel.noticeRating!!.toInt() + 1).toString()
+                                            val map2 = mapOf(
+                                                "noticeRating" to newCount
+                                            )
+                                            ref.updateChildren(map2)
+                                        }
+
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+                                    }
+                                })
+
+                                var count = binding.countRating.text.toString()
+                                binding.countRating.text = (count.toInt() + 1).toString()
+                            }
+
+                            binding.btnDown.setOnClickListener {
+
+                                binding.btnUp.setImageResource(R.drawable.up_arrow_outlined)
+                                binding.btnDown.setImageResource(R.drawable.down_arrow_filled)
+
+                                val databaseReference = FirebaseDatabase.getInstance().getReference("NoticeRatings")
+                                val map = mapOf(
+                                    "noticeID" to noticeID,
+                                    "userID" to userID,
+                                    "ratingUp" to false,
+                                    "ratingDown" to true,
+                                )
+                                databaseReference!!.child(noticeID.toString()).child(userID).setValue(map)
+
+
+                                val ref = FirebaseDatabase.getInstance().getReference("Notices").child(noticeID.toString())
+
+                                ref.addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        val noticeModel = snapshot.getValue(NoticeModel::class.java)
+                                        noticeModel?.let {
+                                            val newCount = (noticeModel.noticeRating!!.toInt() - 1).toString()
+                                            val map2 = mapOf(
+                                                "noticeRating" to newCount
+                                            )
+                                            ref.updateChildren(map2)
+                                        }
+
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+                                    }
+                                })
+                                var count = binding.countRating.text.toString()
+                                binding.countRating.text = (count.toInt() - 1).toString()
+                            }
+                        }
+
+                        if (noticeRating.ratingUp == true && noticeRating.ratingDown == false){
+
+                            binding.btnUp.setOnClickListener {
+                                binding.btnUp.setImageResource(R.drawable.up_arrow_outlined)
+                                binding.btnDown.setImageResource(R.drawable.down_arrow_outlined)
+
+                                val databaseReference = FirebaseDatabase.getInstance().getReference("NoticeRatings")
+                                val map = mapOf(
+                                    "noticeID" to noticeID,
+                                    "userID" to userID,
+                                    "ratingUp" to false,
+                                    "ratingDown" to false,
+                                )
+                                databaseReference.child(noticeID.toString()).child(userID).setValue(map)
+
+                                val ref = FirebaseDatabase.getInstance().getReference("Notices").child(noticeID.toString())
+
+                                ref.addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        val noticeModel = snapshot.getValue(NoticeModel::class.java)
+                                        noticeModel?.let {
+                                            val newCount = (noticeModel.noticeRating!!.toInt() - 1).toString()
+                                            val map2 = mapOf(
+                                                "noticeRating" to newCount
+                                            )
+                                            ref.updateChildren(map2)
+                                        }
+
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+                                    }
+                                })
+
+                                var count = binding.countRating.text.toString()
+                                binding.countRating.text = (count.toInt() - 1).toString()
+                            }
+
+                            binding.btnDown.setOnClickListener {
+                                binding.btnUp.setImageResource(R.drawable.up_arrow_outlined)
+                                binding.btnDown.setImageResource(R.drawable.down_arrow_filled)
+
+                                val databaseReference = FirebaseDatabase.getInstance().getReference("NoticeRatings")
+                                val map = mapOf(
+                                    "noticeID" to noticeID,
+                                    "userID" to userID,
+                                    "ratingUp" to false,
+                                    "ratingDown" to true,
+                                )
+                                databaseReference!!.child(noticeID.toString()).child(userID).setValue(map)
+
+
+                                val ref = FirebaseDatabase.getInstance().getReference("Notices").child(noticeID.toString())
+
+                                ref.addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        val noticeModel = snapshot.getValue(NoticeModel::class.java)
+                                        noticeModel?.let {
+                                            val newCount = (noticeModel.noticeRating!!.toInt() - 2).toString()
+                                            val map2 = mapOf(
+                                                "noticeRating" to newCount
+                                            )
+                                            ref.updateChildren(map2)
+                                        }
+
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+                                    }
+                                })
+                                var count = binding.countRating.text.toString()
+                                binding.countRating.text = (count.toInt() - 2).toString()
+                            }
+                        }
+
+                        if (noticeRating.ratingUp == false && noticeRating.ratingDown == true){
+
+                            binding.btnUp.setOnClickListener {
+                                binding.btnUp.setImageResource(R.drawable.up_arrow_filled)
+                                binding.btnDown.setImageResource(R.drawable.down_arrow_outlined)
+
+                                val databaseReference = FirebaseDatabase.getInstance().getReference("NoticeRatings")
+                                val map = mapOf(
+                                    "noticeID" to noticeID,
+                                    "userID" to userID,
+                                    "ratingUp" to true,
+                                    "ratingDown" to false,
+                                )
+                                databaseReference.child(noticeID.toString()).child(userID).setValue(map)
+
+                                val ref = FirebaseDatabase.getInstance().getReference("Notices").child(noticeID.toString())
+
+                                ref.addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        val noticeModel = snapshot.getValue(NoticeModel::class.java)
+                                        noticeModel?.let {
+                                            val newCount = (noticeModel.noticeRating!!.toInt() + 2).toString()
+                                            val map2 = mapOf(
+                                                "noticeRating" to newCount
+                                            )
+                                            ref.updateChildren(map2)
+                                        }
+
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+                                    }
+                                })
+
+                                var count = binding.countRating.text.toString()
+                                binding.countRating.text = (count.toInt() + 2).toString()
+                            }
+
+                            binding.btnDown.setOnClickListener {
+                                binding.btnUp.setImageResource(R.drawable.up_arrow_outlined)
+                                binding.btnDown.setImageResource(R.drawable.down_arrow_outlined)
+                                val databaseReference = FirebaseDatabase.getInstance().getReference("NoticeRatings")
+                                val map = mapOf(
+                                    "noticeID" to noticeID,
+                                    "userID" to userID,
+                                    "ratingUp" to false,
+                                    "ratingDown" to false,
+                                )
+                                databaseReference!!.child(noticeID.toString()).child(userID).setValue(map)
+
+
+                                val ref = FirebaseDatabase.getInstance().getReference("Notices").child(noticeID.toString())
+
+                                ref.addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        val noticeModel = snapshot.getValue(NoticeModel::class.java)
+                                        noticeModel?.let {
+                                            val newCount = (noticeModel.noticeRating!!.toInt() + 1).toString()
+                                            val map2 = mapOf(
+                                                "noticeRating" to newCount
+                                            )
+                                            ref.updateChildren(map2)
+                                        }
+
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+                                    }
+                                })
+                                var count = binding.countRating.text.toString()
+                                binding.countRating.text = (count.toInt() + 1).toString()
+                            }
+                        }
+                    }
+                }else{
+                    binding.btnUp.setOnClickListener {
+
+                        binding.btnUp.setImageResource(R.drawable.up_arrow_filled)
+                        binding.btnDown.setImageResource(R.drawable.down_arrow_outlined)
+
+                        val databaseReference = FirebaseDatabase.getInstance().getReference("NoticeRatings")
+                        val map = mapOf(
+                            "noticeID" to noticeID,
+                            "userID" to userID,
+                            "ratingUp" to true,
+                            "ratingDown" to false,
+                        )
+                        databaseReference.child(noticeID.toString()).child(userID).setValue(map)
+
+                        val ref = FirebaseDatabase.getInstance().getReference("Notices").child(noticeID.toString())
+
+                        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                val noticeModel = snapshot.getValue(NoticeModel::class.java)
+                                noticeModel?.let {
+                                    val newCount = (noticeModel.noticeRating!!.toInt() + 1).toString()
+                                    val map2 = mapOf(
+                                        "noticeRating" to newCount
+                                    )
+                                    ref.updateChildren(map2)
+                                }
+
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                            }
+                        })
+
+                        var count = binding.countRating.text.toString()
+                        binding.countRating.text = (count.toInt() + 1).toString()
+                    }
+
+                    binding.btnDown.setOnClickListener {
+
+                        binding.btnUp.setImageResource(R.drawable.up_arrow_outlined)
+                        binding.btnDown.setImageResource(R.drawable.down_arrow_filled)
+
+                        val databaseReference = FirebaseDatabase.getInstance().getReference("NoticeRatings")
+                        val map = mapOf(
+                            "noticeID" to noticeID,
+                            "userID" to userID,
+                            "ratingUp" to false,
+                            "ratingDown" to true,
+                        )
+                        databaseReference!!.child(noticeID.toString()).child(userID).setValue(map)
+
+
+                        val ref = FirebaseDatabase.getInstance().getReference("Notices").child(noticeID.toString())
+
+                        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                val noticeModel = snapshot.getValue(NoticeModel::class.java)
+                                noticeModel?.let {
+                                    val newCount = (noticeModel.noticeRating!!.toInt() - 1).toString()
+                                    val map2 = mapOf(
+                                        "noticeRating" to newCount
+                                    )
+                                    ref.updateChildren(map2)
+                                }
+
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                            }
+                        })
+                        var count = binding.countRating.text.toString()
+                        binding.countRating.text = (count.toInt() - 1).toString()
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        })
+
+
+
+
+
+
         binding.recycler.setOnTouchListener { _, _ ->
             true
         }
 
     }
+
+
 
     fun getNoticeFromFirebase(noticeID:String){
         val databaseReference = FirebaseDatabase.getInstance().getReference("Notices")
@@ -139,17 +465,20 @@ class NoticeDetailActivity : AppCompatActivity() {
                             binding.noticeModel = noticeModel
                             if (noticeModel.noticeDegree == "green"){
                                 binding.contextNoticeItem.background = this@NoticeDetailActivity.resources.getDrawable(R.drawable.border_notice_detail_green)
-                                binding.btnLike.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.main_green), PorterDuff.Mode.SRC_IN)
+                                binding.btnUp.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.main_green), PorterDuff.Mode.SRC_IN)
+                                binding.btnDown.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.main_green), PorterDuff.Mode.SRC_IN)
                                 binding.btnComment.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.main_green), PorterDuff.Mode.SRC_IN)
                             }
                             if (noticeModel.noticeDegree == "yellow"){
                                 binding.contextNoticeItem.background = this@NoticeDetailActivity.resources.getDrawable(R.drawable.border_notice_detail_yellow)
-                                binding.btnLike.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.mainYellow), PorterDuff.Mode.SRC_IN)
+                                binding.btnUp.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.mainYellow), PorterDuff.Mode.SRC_IN)
+                                binding.btnDown.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.mainYellow), PorterDuff.Mode.SRC_IN)
                                 binding.btnComment.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.mainYellow), PorterDuff.Mode.SRC_IN)
                             }
                             if (noticeModel.noticeDegree == "red"){
                                 binding.contextNoticeItem.background = this@NoticeDetailActivity.resources.getDrawable(R.drawable.border_notice_detail_red)
-                                binding.btnLike.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.main_red2), PorterDuff.Mode.SRC_IN)
+                                binding.btnUp.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.main_red2), PorterDuff.Mode.SRC_IN)
+                                binding.btnDown.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.main_red2), PorterDuff.Mode.SRC_IN)
                                 binding.btnComment.setColorFilter(ContextCompat.getColor(this@NoticeDetailActivity, R.color.main_red2), PorterDuff.Mode.SRC_IN)
                             }
 
@@ -220,6 +549,7 @@ class NoticeDetailActivity : AppCompatActivity() {
                             }else{
                                 binding.noticeImage.visibility = View.GONE
                             }
+
                         }
                     }
                 }
@@ -230,107 +560,9 @@ class NoticeDetailActivity : AppCompatActivity() {
             }
         })
 
-    }
 
-    fun getUserNoticeFromFirebase(uid:String) {
-
-        val databaseReference = FirebaseDatabase.getInstance().getReference("Notices").child(uid)
-
-        databaseReference.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    val noticeModel = snapshot.getValue(NoticeModel::class.java)
-                    binding.noticeModel = noticeModel
-                    //Picasso.get().load(userModel!!.image).into(activityUserInfoBinding.imgProfile)
-                    Glide.with(applicationContext).load(noticeModel!!.userImage).into(binding.imgContactItem)
-
-                    if (noticeModel.noticeDegree == "green"){
-                        binding.contextNoticeItem.background = this@NoticeDetailActivity.resources.getDrawable(R.drawable.border_notice_detail_green)
-
-                    }
-                    if (noticeModel.noticeDegree == "yellow"){
-                        binding.contextNoticeItem.background = this@NoticeDetailActivity.resources.getDrawable(R.drawable.border_notice_detail_yellow)
-                    }
-                    if (noticeModel.noticeDegree == "red"){
-                        binding.contextNoticeItem.background = this@NoticeDetailActivity.resources.getDrawable(R.drawable.border_notice_detail_red)
-                    }
-
-                    var currentTime = System.currentTimeMillis()
-
-                    val simpleDateFormat = SimpleDateFormat("kk:mm", Locale.getDefault())
-                    val simpleDateFormat2 = SimpleDateFormat("kk:mm dd.MM.yyyy", Locale.getDefault())
-
-
-                    val minute = SimpleDateFormat("mm", Locale.getDefault())
-                    val hours = SimpleDateFormat("kk", Locale.getDefault())
-                    val day = SimpleDateFormat("dd", Locale.getDefault())
-                    val month = SimpleDateFormat("MM", Locale.getDefault())
-                    val year = SimpleDateFormat("yyyy", Locale.getDefault())
-
-                    val sharedNoticeMinute = minute.format(noticeModel.noticeTime?.toLong())
-                    val sharedNoticeHours = hours.format(noticeModel.noticeTime?.toLong())
-                    val sharedNoticeDay = day.format(noticeModel.noticeTime?.toLong())
-                    val sharedNoticeMonth = month.format(noticeModel.noticeTime?.toLong())
-                    val sharedNoticeYear = year.format(noticeModel.noticeTime?.toLong())
-
-                    val currentMinute = minute.format(currentTime)
-                    val currentHours = hours.format(currentTime)
-                    val currentDay = day.format(currentTime)
-                    val currentMonth = month.format(currentTime)
-                    val currentYear = year.format(currentTime)
-
-                    val date = simpleDateFormat.format(noticeModel.noticeTime?.toLong())
-                    val date2 = simpleDateFormat2.format(noticeModel.noticeTime?.toLong())
-
-
-                    val now = Calendar.getInstance()
-                    val noticeTimeMillis = noticeModel.noticeTime?.toLong() ?: 0
-                    val noticeTime = Calendar.getInstance().apply { timeInMillis = noticeTimeMillis }
-
-                    val diffMillis = now.timeInMillis - noticeTime.timeInMillis
-                    val diffMinutes = diffMillis / (1000 * 60)
-                    var zaman = currentTime - noticeModel.noticeTime!!.toLong()
-
-                    if (zaman < 60_000
-                        /*
-                    if (now.get(Calendar.YEAR) == noticeTime.get(Calendar.YEAR) &&
-                        now.get(Calendar.DAY_OF_YEAR) == noticeTime.get(Calendar.DAY_OF_YEAR) &&
-                        now.get(Calendar.HOUR_OF_DAY) == noticeTime.get(Calendar.HOUR_OF_DAY) &&
-                        now.get(Calendar.MINUTE) == noticeTime.get(Calendar.MINUTE)
-
-                         */
-                    ) {
-                        binding.tvTime.text = "Şimdi"
-                    }
-                    else {
-                        if (diffMinutes < 60 && diffMinutes >= 1){
-                            binding.tvTime.text = "${diffMinutes} dakika önce"
-                        }else{
-                            if(sharedNoticeDay == currentDay && sharedNoticeMonth == currentMonth && sharedNoticeYear == currentYear){
-                                binding.tvTime.text = "Bugün ${date.toString()}"
-                            }else{
-                                binding.tvTime.text = date2.toString()
-
-                            }
-                        }
-                    }
-
-                    if (noticeModel.noticeImage != ""){
-                        noticeImageUrl = noticeModel.noticeImage
-                        Glide.with(applicationContext).load(noticeModel.noticeImage).into(binding.noticeImage)
-                        binding.noticeImage.visibility = View.VISIBLE
-                    }else{
-                        binding.noticeImage.visibility = View.GONE
-                    }
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-            }
-        })
 
     }
-
 
     fun getCommentsFromFirebase() {
 
