@@ -53,7 +53,6 @@ class DmScreenAdapter(
         return DmScreenAdapter.ViewHolder(dmScreenLayoutBinding)
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val conversationModel = allContact[position]
         if(conversationModel.senderId == FirebaseAuth.getInstance().currentUser!!.uid || conversationModel.receiverId == FirebaseAuth.getInstance().currentUser!!.uid){

@@ -1,14 +1,12 @@
 package com.example.bitirmeprojesi.Adapters
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.PopupMenu
-import android.widget.PopupWindow
-import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -16,19 +14,23 @@ import com.example.bitirmeprojesi.Activities.UserInfoActivity
 import com.example.bitirmeprojesi.FollowRequestModel
 import com.example.bitirmeprojesi.R
 import com.example.bitirmeprojesi.UserModel
+import com.example.bitirmeprojesi.databinding.DialogTakibiBirakBinding
+import com.example.bitirmeprojesi.databinding.DialogTakipciyiCikarBinding
 import com.example.bitirmeprojesi.databinding.ItemFollowBinding
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
-class FollowAdapter(val followList: List<FollowRequestModel>,val context: Context, var TYPE: Int):
+class FollowAdapter(val followList: MutableList<FollowRequestModel>, val context: Context, var TYPE: Int):
     RecyclerView.Adapter<FollowAdapter.FollowViewHolder>() {
+
+    private lateinit var takibiBirakBinding: DialogTakibiBirakBinding
+    private lateinit var takipciyiCikarBinding: DialogTakipciyiCikarBinding
+    private lateinit var dialog: AlertDialog
     class FollowViewHolder(val view: ItemFollowBinding): RecyclerView.ViewHolder(view.root) {
 
     }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FollowViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val view = DataBindingUtil.inflate<ItemFollowBinding>(inflater,
@@ -62,51 +64,67 @@ class FollowAdapter(val followList: List<FollowRequestModel>,val context: Contex
                     val id = menuItem.itemId
 
                     if (id == R.id.item){
-                        var reference =
-                            FirebaseDatabase.getInstance().getReference("Followers")
-                        reference.child(follows.receiverId).child(follows.senderId).removeValue()
+                        val alertDialog = AlertDialog.Builder(it.context)
+                        val inflater =
+                            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+                        takipciyiCikarBinding = DialogTakipciyiCikarBinding.inflate(inflater)
+                        alertDialog.setView(takipciyiCikarBinding.root)
 
-                        val databaseReferenceReceiver = FirebaseDatabase.getInstance().getReference("Users").child(follows.receiverId)
-                        databaseReferenceReceiver.addListenerForSingleValueEvent(object : ValueEventListener {
-                            override fun onDataChange(snapshot: DataSnapshot) {
-                                if (snapshot.exists()) {
-                                    val userModel = snapshot.getValue(UserModel::class.java)
-                                    if (userModel != null) {
-                                        val newCount = (userModel.followers.toInt() - 1).toString()
-                                        val map2 = mapOf(
-                                            "followers" to newCount
-                                        )
-                                        referenceUsers.child(follows.receiverId).updateChildren(map2)
+                        takipciyiCikarBinding.btnYes.setOnClickListener {
+
+                            var reference =
+                                FirebaseDatabase.getInstance().getReference("Followers")
+                            reference.child(follows.receiverId).child(follows.senderId).removeValue()
+                            notifyItemRemoved(position)
+                            followList.removeAt(position)
+
+                            val databaseReferenceReceiver = FirebaseDatabase.getInstance().getReference("Users").child(follows.receiverId)
+                            databaseReferenceReceiver.addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    if (snapshot.exists()) {
+                                        val userModel = snapshot.getValue(UserModel::class.java)
+                                        if (userModel != null) {
+                                            val newCount = (userModel.followers.toInt() - 1).toString()
+                                            val map2 = mapOf(
+                                                "followers" to newCount
+                                            )
+                                            referenceUsers.child(follows.receiverId).updateChildren(map2)
+                                        }
+                                        //Picasso.get().load(userModel!!.image).into(activityMessageBinding.imgProfile)
                                     }
-                                    //Picasso.get().load(userModel!!.image).into(activityMessageBinding.imgProfile)
                                 }
-                            }
 
-                            override fun onCancelled(error: DatabaseError) {
-                                TODO("Not yet implemented")
-                            }
-                        })
+                                override fun onCancelled(error: DatabaseError) {
+                                    TODO("Not yet implemented")
+                                }
+                            })
 
-                        val databaseReferenceSender = FirebaseDatabase.getInstance().getReference("Users").child(follows.senderId)
-                        databaseReferenceSender.addListenerForSingleValueEvent(object : ValueEventListener {
-                            override fun onDataChange(snapshot: DataSnapshot) {
-                                if (snapshot.exists()) {
-                                    val userModel = snapshot.getValue(UserModel::class.java)
-                                    if (userModel != null) {
-                                        val newCount = (userModel.following.toInt() - 1).toString()
-                                        val map2 = mapOf(
-                                            "following" to newCount
-                                        )
-                                        referenceUsers.child(follows.senderId).updateChildren(map2)
+                            val databaseReferenceSender = FirebaseDatabase.getInstance().getReference("Users").child(follows.senderId)
+                            databaseReferenceSender.addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    if (snapshot.exists()) {
+                                        val userModel = snapshot.getValue(UserModel::class.java)
+                                        if (userModel != null) {
+                                            val newCount = (userModel.following.toInt() - 1).toString()
+                                            val map2 = mapOf(
+                                                "following" to newCount
+                                            )
+                                            referenceUsers.child(follows.senderId).updateChildren(map2)
+                                        }
                                     }
-                                    //Picasso.get().load(userModel!!.image).into(activityMessageBinding.imgProfile)
                                 }
-                            }
 
-                            override fun onCancelled(error: DatabaseError) {
-                                TODO("Not yet implemented")
-                            }
-                        })
+                                override fun onCancelled(error: DatabaseError) {
+                                    TODO("Not yet implemented")
+                                }
+                            })
+                            dialog.dismiss()
+                        }
+                        takipciyiCikarBinding.btnNo.setOnClickListener {
+                            dialog.dismiss()
+                        }
+                        dialog = alertDialog.create()
+                        dialog.show()
                     }
 
                     false
@@ -139,51 +157,71 @@ class FollowAdapter(val followList: List<FollowRequestModel>,val context: Contex
                     val id = menuItem.itemId
 
                     if (id == R.id.item){
-                        var reference =
-                            FirebaseDatabase.getInstance().getReference("Followers")
-                        reference.child(follows.receiverId).child(follows.senderId).removeValue()
 
-                        val databaseReferenceReceiver = FirebaseDatabase.getInstance().getReference("Users").child(follows.receiverId)
-                        databaseReferenceReceiver.addListenerForSingleValueEvent(object : ValueEventListener {
-                            override fun onDataChange(snapshot: DataSnapshot) {
-                                if (snapshot.exists()) {
-                                    val userModel = snapshot.getValue(UserModel::class.java)
-                                    if (userModel != null) {
-                                        val newCount = (userModel.followers.toInt() - 1).toString()
-                                        val map2 = mapOf(
-                                            "followers" to newCount
-                                        )
-                                        referenceUsers.child(follows.receiverId).updateChildren(map2)
+                        val alertDialog = AlertDialog.Builder(it.context)
+                        val inflater =
+                            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+                        takibiBirakBinding = DialogTakibiBirakBinding.inflate(inflater)
+                        alertDialog.setView(takibiBirakBinding.root)
+
+
+                        takibiBirakBinding.btnYes.setOnClickListener {
+                            var reference =
+                                FirebaseDatabase.getInstance().getReference("Followers")
+                            reference.child(follows.receiverId).child(follows.senderId).removeValue()
+                            notifyItemRemoved(position)
+                            followList.removeAt(position)
+
+                            val databaseReferenceReceiver = FirebaseDatabase.getInstance().getReference("Users").child(follows.receiverId)
+                            databaseReferenceReceiver.addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    if (snapshot.exists()) {
+                                        val userModel = snapshot.getValue(UserModel::class.java)
+                                        if (userModel != null) {
+                                            val newCount = (userModel.followers.toInt() - 1).toString()
+                                            val map2 = mapOf(
+                                                "followers" to newCount
+                                            )
+                                            referenceUsers.child(follows.receiverId).updateChildren(map2)
+                                        }
+                                        //Picasso.get().load(userModel!!.image).into(activityMessageBinding.imgProfile)
                                     }
-                                    //Picasso.get().load(userModel!!.image).into(activityMessageBinding.imgProfile)
                                 }
-                            }
 
-                            override fun onCancelled(error: DatabaseError) {
-                                TODO("Not yet implemented")
-                            }
-                        })
+                                override fun onCancelled(error: DatabaseError) {
+                                    TODO("Not yet implemented")
+                                }
+                            })
 
-                        val databaseReferenceSender = FirebaseDatabase.getInstance().getReference("Users").child(follows.senderId)
-                        databaseReferenceSender.addListenerForSingleValueEvent(object : ValueEventListener {
-                            override fun onDataChange(snapshot: DataSnapshot) {
-                                if (snapshot.exists()) {
-                                    val userModel = snapshot.getValue(UserModel::class.java)
-                                    if (userModel != null) {
-                                        val newCount = (userModel.following.toInt() - 1).toString()
-                                        val map2 = mapOf(
-                                            "following" to newCount
-                                        )
-                                        referenceUsers.child(follows.senderId).updateChildren(map2)
+                            val databaseReferenceSender = FirebaseDatabase.getInstance().getReference("Users").child(follows.senderId)
+                            databaseReferenceSender.addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    if (snapshot.exists()) {
+                                        val userModel = snapshot.getValue(UserModel::class.java)
+                                        if (userModel != null) {
+                                            val newCount = (userModel.following.toInt() - 1).toString()
+                                            val map2 = mapOf(
+                                                "following" to newCount
+                                            )
+                                            referenceUsers.child(follows.senderId).updateChildren(map2)
+                                        }
+                                        //Picasso.get().load(userModel!!.image).into(activityMessageBinding.imgProfile)
                                     }
-                                    //Picasso.get().load(userModel!!.image).into(activityMessageBinding.imgProfile)
                                 }
-                            }
 
-                            override fun onCancelled(error: DatabaseError) {
-                                TODO("Not yet implemented")
-                            }
-                        })
+                                override fun onCancelled(error: DatabaseError) {
+                                    TODO("Not yet implemented")
+                                }
+                            })
+
+                            dialog.dismiss()
+                        }
+                        takibiBirakBinding.btnNo.setOnClickListener {
+                            dialog.dismiss()
+                        }
+                        dialog = alertDialog.create()
+                        dialog.show()
+
                     }
 
                     false

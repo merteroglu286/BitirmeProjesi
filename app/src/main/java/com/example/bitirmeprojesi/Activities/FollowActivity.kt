@@ -1,10 +1,8 @@
 package com.example.bitirmeprojesi.Activities
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -37,10 +35,10 @@ class FollowActivity : AppCompatActivity() {
 
     fun getFollowersData() {
         val followingList = ArrayList<FollowRequestModel>()
-
         FirebaseDatabase.getInstance().getReference("Followers")
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
+                    followingList.clear()
                     for (hisIdSnapshot in snapshot.children) {
                         for (userIdSnapshot in hisIdSnapshot.children) {
                             val userId = userIdSnapshot.key
@@ -67,7 +65,7 @@ class FollowActivity : AppCompatActivity() {
         followRequestsWiewModel.followersLiveData.observe(this, Observer { follow ->
             follow?.let{
                 followRecycler.layoutManager = LinearLayoutManager(this)
-                followRecycler.adapter = FollowAdapter(follow,this,0)
+                followRecycler.adapter = FollowAdapter(follow as MutableList<FollowRequestModel>,this,0)
             }
         })
 

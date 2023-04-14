@@ -47,7 +47,6 @@ class KullaniciCinsiyetFragment : Fragment() {
         databaseReference = FirebaseDatabase.getInstance().getReference("Users")
 
         binding.btnFemale.setOnClickListener {
-            Toast.makeText(context,"kadın tıklandı",Toast.LENGTH_SHORT).show()
             femaleBool = true
             maleBool = false
 
@@ -60,7 +59,6 @@ class KullaniciCinsiyetFragment : Fragment() {
         }
 
         binding.btnMale.setOnClickListener {
-            Toast.makeText(context,"erkek tıklandı",Toast.LENGTH_SHORT).show()
             femaleBool = false
             maleBool = true
             binding.btnMale.setBackgroundResource(R.drawable.male_button)

@@ -132,4 +132,27 @@
         app:fabSize="mini" />
 
 
+    <RelativeLayout
+        android:id="@+id/progressBar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#73A7A7A7"
+        android:visibility="invisible"
+        android:clickable="true"
+        android:focusable="true">
+
+        <View
+            android:id="@+id/overlayView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"/>
+
+        <ProgressBar
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_centerInParent="true"
+            android:indeterminateTint="#87C9AC" />
+
+    </RelativeLayout>
+
 </RelativeLayout>

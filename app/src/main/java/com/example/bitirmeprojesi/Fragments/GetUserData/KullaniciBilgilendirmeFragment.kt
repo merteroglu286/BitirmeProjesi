@@ -12,6 +12,8 @@ import com.example.bitirmeprojesi.R
 import com.example.bitirmeprojesi.databinding.FragmentGetPhoneNumberBinding
 import com.example.bitirmeprojesi.databinding.FragmentKullaniciBilgilendirmeBinding
 import com.example.bitirmeprojesi.databinding.GetuserdataWhenClosedDialogBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class KullaniciBilgilendirmeFragment : Fragment() {
 
@@ -41,6 +43,13 @@ class KullaniciBilgilendirmeFragment : Fragment() {
             val action = KullaniciBilgilendirmeFragmentDirections.actionKullaniciBilgilendirmeFragmentToKullaniciAdiFragment()
             Navigation.findNavController(it).navigate(action)
         }
+        val databaseReference = FirebaseDatabase.getInstance().getReference("Users")
+        val firebaseAuth = FirebaseAuth.getInstance()
+        val uid = firebaseAuth!!.uid!!.toString()
+        val map = mapOf(
+            "kayitliMi" to false,
+        )
+        databaseReference!!.child(uid).updateChildren(map)
 
         binding.btnClose.setOnClickListener {
 

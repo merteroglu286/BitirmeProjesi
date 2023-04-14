@@ -29,54 +29,30 @@
         android:textSize="18dp" />
 
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/main_gray"
-        android:layout_above="@id/linear"/>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/linear"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:layout_below="@id/text2"
         android:layout_centerHorizontal="true"
-        android:orientation="horizontal">
-
+        android:layout_marginBottom="10dp">
         <TextView
             android:id="@+id/btnNo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="10dp"
-            android:text="HAYIR"
+            android:layout_marginEnd="40dp"
             android:textSize="24dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/view2"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <View
-            android:id="@+id/view2"
-            android:layout_width="1dp"
-            android:layout_height="50dp"
-            android:layout_above="@id/linear"
-            android:background="@color/main_gray"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
+            android:background="?selectableItemBackground"
+            android:textColor="@color/black"
+            android:text="Hayır"/>
         <TextView
             android:id="@+id/btnYes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="10dp"
-            android:text="EVET"
-            android:textColor="@color/main_blue"
-            android:textSize="24dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/view2"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:layout_marginStart="40dp"
+            android:text="Evet"
+            android:background="?selectableItemBackground"
+            android:textColor="@color/black"
+            android:textSize="24dp"/>
+    </LinearLayout>
 </RelativeLayout>

@@ -131,6 +131,7 @@ class AllNoticesActivity : AppCompatActivity() {
     fun observeLiveData(centerLatitude: Double, centerLongitude: Double) {
         noticesViewModel.noticesLiveData.observe(this, Observer { notices ->
             notices?.let {
+                noticeList.clear()
                 binding.radioGroupFilter.setOnCheckedChangeListener { group, checkedId ->
                     val selectedDegree = when (checkedId) {
                         R.id.btnGreenFilterAllNotices -> "green"

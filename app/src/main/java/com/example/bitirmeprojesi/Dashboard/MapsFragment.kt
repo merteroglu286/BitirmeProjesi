@@ -118,6 +118,11 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
         super.onViewCreated(view, savedInstanceState)
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
 
+        binding.progressBar.visibility = View.VISIBLE
+
+        binding.overlayView.visibility = View.VISIBLE
+        binding.overlayView.setOnClickListener(null)
+
         userLiveData()
 
 
@@ -225,7 +230,7 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
             @SuppressLint("UseCompatLoadingForDrawables")
             override fun onLocationChanged(konum: Location) {
                 // lokasyon,konum degisince yapilacak islemer
-
+                binding.progressBar.visibility = View.GONE
                 guncelKonum = LatLng(konum.latitude,konum.longitude)
 
                 centerLat = konum.latitude
@@ -303,7 +308,7 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                             val timestamp = System.currentTimeMillis().toString()
 
                             if (noticeImageUri != null){
-                                storageReference!!.child(userID + "/SharedPhotos/${timestamp}").putFile(noticeImageUri!!)
+                                FirebaseStorage.getInstance().reference.child(userID + "/SharedPhotos/${timestamp}").putFile(noticeImageUri!!)
                                     .addOnSuccessListener {
                                         val task = it.storage.downloadUrl
                                         task.addOnCompleteListener { uri ->
@@ -371,6 +376,8 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                             })
 
 
+                            noticeImageUrl = ""
+                            noticeImageUri = null
 
                             dialog.dismiss()
 
@@ -482,14 +489,17 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                         if (notice.noticeDegree == "green"){
                             view.linearContext.background = this@MapsFragment.resources.getDrawable(R.drawable.border_notice_detail_green)
                             view.countRating.setTextColor(ContextCompat.getColor(requireContext(), R.color.main_green))
+                            view.imgRating.setColorFilter(ContextCompat.getColor(requireContext(), R.color.main_green), PorterDuff.Mode.SRC_IN)
                         }
                         if (notice.noticeDegree == "yellow"){
                             view.linearContext.background = this@MapsFragment.resources.getDrawable(R.drawable.border_notice_detail_yellow)
                             view.countRating.setTextColor(ContextCompat.getColor(requireContext(), R.color.mainYellow))
+                            view.imgRating.setColorFilter(ContextCompat.getColor(requireContext(), R.color.mainYellow), PorterDuff.Mode.SRC_IN)
                         }
                         if (notice.noticeDegree == "red"){
                             view.linearContext.background = this@MapsFragment.resources.getDrawable(R.drawable.border_notice_detail_red)
                             view.countRating.setTextColor(ContextCompat.getColor(requireContext(), R.color.main_red))
+                            view.imgRating.setColorFilter(ContextCompat.getColor(requireContext(), R.color.main_red), PorterDuff.Mode.SRC_IN)
                         }
                         Glide.with(requireContext()).load(notice.userImage).into(imgInfo)
                     }
@@ -742,7 +752,7 @@ class MapsFragment : Fragment(),OnMapReadyCallback,GoogleMap.OnMarkerClickListen
                 if (resultCode == Activity.RESULT_OK) {
                     noticeImageUri = result.uri
                     dialogBinding.noticeImage.setImageURI(noticeImageUri)
-                    dialogBinding.noticeImage.visibility = View.VISIBLE
+                    dialogBinding.coordinatorLayout.visibility = View.VISIBLE
                 }
             }
         }

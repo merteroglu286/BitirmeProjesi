@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -14,16 +15,19 @@ import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
 import com.example.bitirmeprojesi.Constants.AppConstants
+import com.example.bitirmeprojesi.ConversationsModel
+import com.example.bitirmeprojesi.NoticeModel
 import com.example.bitirmeprojesi.Permissions.AppPermission
 import com.example.bitirmeprojesi.R
+import com.example.bitirmeprojesi.ViewModels.NoticeViewModel
 import com.example.bitirmeprojesi.ViewModels.ProfileViewModel
 import com.example.bitirmeprojesi.databinding.ActivitySettingsBinding
 import com.example.bitirmeprojesi.databinding.ActivityUserInfoBinding
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.theartofdev.edmodo.cropper.CropImage
@@ -33,6 +37,7 @@ import de.hdodenhof.circleimageview.CircleImageView
 class SettingsActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsBinding
     private lateinit var profileViewModels: ProfileViewModel
+    private lateinit var noticesViewModel : NoticeViewModel
     private lateinit var appPermission: AppPermission
 
     private var databaseReference: DatabaseReference? = null
@@ -53,6 +58,8 @@ class SettingsActivity : AppCompatActivity() {
         profileViewModels = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(
             ProfileViewModel::class.java)
 
+        noticesViewModel = ViewModelProviders.of(this).get(NoticeViewModel::class.java)
+        noticesViewModel.getDataFromFirebase()
         firebaseAuth = FirebaseAuth.getInstance()
         storageReference = FirebaseStorage.getInstance().reference
 
@@ -65,9 +72,12 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.logOut.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
-            startActivity(Intent(this, MainActivity::class.java))
+            val intent = Intent(this, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
             finish()
         }
+
 
 
         binding.imgPickImage.setOnClickListener {
@@ -84,18 +94,58 @@ class SettingsActivity : AppCompatActivity() {
 
             if (storageReference != null){
                 if (image != null){
-                    storageReference!!.child(firebaseAuth!!.uid + AppConstants.PATH).putFile(image!!)
-                        .addOnSuccessListener {
-                            val task = it.storage.downloadUrl
-                            task.addOnCompleteListener { uri ->
-                                imageUrl = uri.result.toString()
-                                uid = firebaseAuth!!.uid!!.toString()
-                                val map = mapOf(
-                                    "image" to imageUrl,
-                                )
-                                databaseReference!!.child(firebaseAuth!!.uid!!).updateChildren(map)
+                    noticesViewModel.noticesLiveData.observe(this, Observer { notices ->
+                        notices?.let {
+                            for (notice in notices){
+                                if (notice.userID == firebaseAuth!!.currentUser!!.uid){
+
+                                    storageReference!!.child(firebaseAuth!!.uid + AppConstants.PATH).putFile(image!!)
+                                        .addOnSuccessListener {
+                                            val task = it.storage.downloadUrl
+                                            task.addOnCompleteListener { uri ->
+                                                imageUrl = uri.result.toString()
+                                                uid = firebaseAuth!!.uid!!.toString()
+                                                val map = mapOf(
+                                                    "image" to imageUrl,
+                                                )
+                                                databaseReference!!.child(firebaseAuth!!.uid!!).updateChildren(map)
+
+                                                val ref = FirebaseDatabase.getInstance().reference.child("Notices").child(notice.noticeID.toString())
+                                                val map1 = mapOf(
+                                                    "userImage" to imageUrl,
+                                                )
+                                                ref.updateChildren(map1)
+
+                                                val databaseReference = FirebaseDatabase.getInstance().getReference("Conversations")
+
+                                                databaseReference.addValueEventListener(object : ValueEventListener {
+                                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                                        for (conversationSnapshot in snapshot.children) {
+                                                            for (userSnapshot in conversationSnapshot.children) {
+                                                                val conversation = userSnapshot.getValue(ConversationsModel::class.java)
+                                                                conversation?.let {
+                                                                    if (conversation.receiverId == firebaseAuth!!.currentUser!!.uid) {
+                                                                        val map = mapOf(
+                                                                            "receiverImage" to imageUrl,
+                                                                        )
+                                                                        databaseReference.child(conversation.senderId).child(conversation.receiverId).updateChildren(map)
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+
+                                                    override fun onCancelled(error: DatabaseError) {
+                                                        // Hata durumunda yapılacak işlemler burada
+                                                    }
+                                                })
+                                            }
+                                        }
+                                }
                             }
                         }
+                    })
+
                 }
 
             }
@@ -106,6 +156,46 @@ class SettingsActivity : AppCompatActivity() {
                 "birthday" to dogumTarihi,
             )
             databaseReference!!.child(firebaseAuth!!.uid!!).updateChildren(map)
+
+            noticesViewModel.noticesLiveData.observe(this, Observer { notices ->
+                notices?.let {
+                    for (notice in notices){
+                        if (notice.userID == firebaseAuth!!.currentUser!!.uid){
+                            val ref = FirebaseDatabase.getInstance().reference.child("Notices").child(notice.noticeID.toString())
+                            val map = mapOf(
+                                "username" to kullaniciAdi,
+                            )
+                            ref.updateChildren(map)
+                        }
+                    }
+                }
+            })
+
+            val databaseReference = FirebaseDatabase.getInstance().getReference("Conversations")
+
+            databaseReference.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    for (conversationSnapshot in snapshot.children) {
+                        for (userSnapshot in conversationSnapshot.children) {
+                            val conversation = userSnapshot.getValue(ConversationsModel::class.java)
+                            conversation?.let {
+                                if (conversation.receiverId == firebaseAuth!!.currentUser!!.uid) {
+                                    val map = mapOf(
+                                        "receiverName" to kullaniciAdi,
+                                    )
+                                    databaseReference.child(conversation.senderId).child(conversation.receiverId).updateChildren(map)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Hata durumunda yapılacak işlemler burada
+                }
+            })
+
+
             finish()
         }
 

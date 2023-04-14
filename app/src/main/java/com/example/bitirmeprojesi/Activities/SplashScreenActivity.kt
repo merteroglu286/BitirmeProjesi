@@ -13,10 +13,15 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
+import com.example.bitirmeprojesi.UserModel
 import com.example.bitirmeprojesi.databinding.ActivitySplashScreenBinding
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.onesignal.OneSignal
 
@@ -56,23 +61,45 @@ class SplashScreenActivity : AppCompatActivity() {
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
             } else {
-                FirebaseMessaging.getInstance().token
-                    .addOnCompleteListener(OnCompleteListener {
-                        if (it.isSuccessful) {
-                            //val token = it.result!!
-                            val token = OneSignal.getDeviceState()!!.userId
-                            Log.i("zxc",token)
-                            val databaseReference =
-                                FirebaseDatabase.getInstance().getReference("Users")
-                                    .child(firebaseAuth!!.currentUser!!.uid)
-                            val map: MutableMap<String, Any> = HashMap()
-                            map["token"] = token
-                            databaseReference.updateChildren(map)
+                val ref = FirebaseDatabase.getInstance().reference.child("Users").child(firebaseAuth!!.currentUser!!.uid)
+
+                ref.addListenerForSingleValueEvent(object : ValueEventListener{
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.exists()) {
+                            val userModel = snapshot.getValue(UserModel::class.java)
+                            if (userModel!!.kayitliMi == true){
+                                FirebaseMessaging.getInstance().token
+                                    .addOnCompleteListener(OnCompleteListener {
+                                        if (it.isSuccessful) {
+                                            //val token = it.result!!
+                                            val token = OneSignal.getDeviceState()!!.userId
+                                            Log.i("zxc",token)
+                                            val databaseReference =
+                                                FirebaseDatabase.getInstance().getReference("Users")
+                                                    .child(firebaseAuth!!.currentUser!!.uid)
+                                            val map: MutableMap<String, Any> = HashMap()
+                                            map["token"] = token
+                                            databaseReference.updateChildren(map)
+                                        }
+                                    })
+                                val intent = Intent(this@SplashScreenActivity, DashboardActivity::class.java)
+                                startActivity(intent)
+                                finish()
+                            }else{
+                                ref.removeValue()
+                                startActivity(Intent(this@SplashScreenActivity, MainActivity::class.java))
+                                finish()
+                            }
                         }
-                    })
-                val intent = Intent(this, DashboardActivity::class.java)
-                startActivity(intent)
-                finish()
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+
+                    }
+
+                })
+
+
             }
 
         }, 2500)

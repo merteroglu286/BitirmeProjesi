@@ -123,7 +123,7 @@ class NearbyNoticesActivity : AppCompatActivity() {
     fun observeLiveData(){
         noticesViewModel.noticesLiveData.observe(this, Observer { notices ->
             notices?.let{
-
+                noticeList.clear()
                 radioGroupFilter.setOnCheckedChangeListener { group, checkedId ->
                     val selectedDegree = when (checkedId) {
                         R.id.btnGreenFilter -> "green"
@@ -172,11 +172,6 @@ class NearbyNoticesActivity : AppCompatActivity() {
                     }
                 }
                 noticeAdapter.updateNoticesList(noticeList)
-
-
-                for (notice in noticeList) {
-                    Log.i("zxccccc","${notice.latitude}, ${notice.longitude}")
-                }
 
             }
         })

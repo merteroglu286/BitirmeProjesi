@@ -27,8 +27,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingTop="4dp"
-                android:paddingEnd="16dp">
+                android:paddingTop="4dp">
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/imgContactItem"
@@ -60,14 +59,6 @@
                             android:textSize="16dp"
                             android:gravity="start"/>
 
-                        <TextView
-                            android:id="@+id/tvTime"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="00:00"
-                            android:layout_marginEnd="24dp"
-                            android:textSize="16dp"
-                            android:gravity="end"/>
                     </LinearLayout>
 
 
@@ -87,6 +78,14 @@
                         android:layout_marginTop="8dp"
                         android:visibility="gone"/>
 
+
+                    <TextView
+                        android:id="@+id/tvTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="00:00"
+                        android:textSize="16dp"
+                        android:layout_gravity="end"/>
                 </LinearLayout>
 
             </LinearLayout>

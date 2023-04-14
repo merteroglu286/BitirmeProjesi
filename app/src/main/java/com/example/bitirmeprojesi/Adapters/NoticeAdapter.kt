@@ -16,7 +16,12 @@ import com.example.bitirmeprojesi.Activities.FullscreenPhotoActivity
 import com.example.bitirmeprojesi.Activities.UserInfoActivity
 import com.example.bitirmeprojesi.NoticeModel
 import com.example.bitirmeprojesi.R
+import com.example.bitirmeprojesi.UserModel
 import com.example.bitirmeprojesi.databinding.ItemNoticeBinding
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -41,6 +46,7 @@ class NoticeAdapter(val noticeList: ArrayList<NoticeModel>,context: Context): Re
     override fun onBindViewHolder(holder: NoticeViewHolder, position: Int) {
         val notice = noticeList[position]
         holder.view.noticeModel = notice
+
         if (notice.noticeImage != ""){
             Glide.with(context).load(notice.noticeImage).into(holder.view.noticeImage)
             holder.view.noticeImage.visibility = View.VISIBLE

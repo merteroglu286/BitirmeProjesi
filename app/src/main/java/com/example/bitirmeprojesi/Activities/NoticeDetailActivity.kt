@@ -65,7 +65,6 @@ class NoticeDetailActivity : AppCompatActivity() {
             userName = it.username
         })
 
-        Toast.makeText(this,noticeID,Toast.LENGTH_SHORT).show()
 
         binding.noticeImage.setOnClickListener {
             val intent = Intent(it.context, FullscreenPhotoActivity::class.java)
@@ -114,6 +113,22 @@ class NoticeDetailActivity : AppCompatActivity() {
         getCommentsFromFirebase()
         getNoticeFromFirebase(noticeID.toString())
 
+        val ref = FirebaseDatabase.getInstance().getReference("Notices").child(noticeID.toString())
+
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val noticeModel = snapshot.getValue(NoticeModel::class.java)
+                noticeModel?.let {
+                    if (noticeModel.noticeRating!!.toInt() == 0){
+                        binding.btnDown
+                    }
+                }
+
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+            }
+        })
 
         val databaseReferenceRating = FirebaseDatabase.getInstance().getReference("NoticeRatings")
         val noticeIDReference = databaseReferenceRating.child(noticeID.toString()).child(userID)

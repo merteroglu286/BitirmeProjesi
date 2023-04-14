@@ -14,12 +14,10 @@ class NoticeViewModel: ViewModel() {
     val noticeLoading = MutableLiveData<Boolean>()
 
     fun getDataFromFirebase() {
-
         val noticesList = arrayListOf<NoticeModel>()
-
         val databaseReference = FirebaseDatabase.getInstance().getReference("Notices")
 
-        databaseReference.addValueEventListener(object : ValueEventListener {
+        databaseReference.orderByChild("noticeTime").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 noticesList.clear()
                 for (data in snapshot.children) {
@@ -37,8 +35,8 @@ class NoticeViewModel: ViewModel() {
                 noticeError.value = true
             }
         })
-
     }
+
 
     fun getUserNoticeFromFirebase(uid:String) {
 

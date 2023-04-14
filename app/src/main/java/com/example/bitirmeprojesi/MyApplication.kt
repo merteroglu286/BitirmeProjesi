@@ -28,10 +28,6 @@ class MyApplication : Application(), LifecycleObserver {
         // OneSignal Initialization
         OneSignal.initWithContext(this)
         OneSignal.setAppId(ONESIGNAL_APP_ID)
-
-        onAppForegrounded()
-        onAppBackgrounded()
-        onAppDestroyed()
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -40,13 +36,16 @@ class MyApplication : Application(), LifecycleObserver {
         if (firebaseAuth?.currentUser != null){
             profileViewModels.updateStatus("online")
         }
-
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     fun onAppBackgrounded() {
         // code to be executed when the app is moved to the background
-        if (firebaseAuth?.currentUser != null){
+        firebaseAuth?.currentUser?.let {
+            if (!::profileViewModels.isInitialized) {
+                profileViewModels = ViewModelProvider.AndroidViewModelFactory.getInstance(this).create(
+                    ProfileViewModel::class.java)
+            }
             profileViewModels.updateStatus("offline")
         }
     }
@@ -59,3 +58,4 @@ class MyApplication : Application(), LifecycleObserver {
         }
     }
 }
+

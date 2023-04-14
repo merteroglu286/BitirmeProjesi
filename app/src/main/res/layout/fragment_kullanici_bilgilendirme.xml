@@ -65,7 +65,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/txt1"
             android:textSize="18dp"
-            android:text="Yorumlarına önem ve değer veriyoruz. Sen de yorumlarının gerçeği yansıttığından emin olarak bize yardım edebilirsin."/>
+            android:text="Paylaşımlarına önem ve değer veriyoruz. Sen de paylaşımlarının gerçeği yansıttığından emin olarak bize yardım edebilirsin."/>
 
 
     </LinearLayout>
@@ -81,7 +81,7 @@
             android:id="@+id/txt3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Dikkatli Ol"
+            android:text="Dürüst Ol"
             android:textSize="20dp"
             android:textColor="@color/black"
             />
@@ -92,7 +92,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/txt1"
             android:textSize="18dp"
-            android:text="Kişisel bilgilerini paylaşmadan önce iyi düşün.Tedbirli kullan."/>
+            android:text="Diğer kullanıcıların bildirilerini puanlarken dürüst davran."/>
 
 
     </LinearLayout>
@@ -136,7 +136,7 @@
             android:id="@+id/txt7"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Proaktif Ol"
+            android:text="Kötüye Kullanma"
             android:textSize="20dp"
             android:textColor="@color/black"
             />
@@ -147,7 +147,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/txt1"
             android:textSize="18dp"
-            android:text="Kötü davranışları mutlaka bize bildir."/>
+            android:text="Haritayı uygulamanın amacı dışında kullanma."/>
 
 
     </LinearLayout>
